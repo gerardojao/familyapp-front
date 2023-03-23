@@ -1,0 +1,33 @@
+body{
+   max-width: 1300px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   margin:auto;
+   min-height: 100vh;
+   height: fit-content;
+}
+
+
+.App{
+    display:flex;
+    flex-direction: column;
+}
+.containerInputClose{
+    display:flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-success{
+    width: fit-content;
+    margin-bottom: .8rem;
+}
+.inputBuscar{
+  
+   width: 100%;
+    text-align: center;
+}
+.table-bordered{
+    border:blue;
+}
