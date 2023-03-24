@@ -25,7 +25,7 @@ const Home = ({ dataToEdit, setDataToEdit }) => {
           Registrar Ingresos
         </button>
         <button className="btn btn-success" onClick={() => verIngreso()}>
-          Grafica Ingresos
+          Ver Ingresos
         </button>
         <button className="btn btn-danger" onClick={() => registroEgreso()}>
           Registrar Egreso
