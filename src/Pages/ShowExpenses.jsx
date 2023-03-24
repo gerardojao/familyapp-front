@@ -50,14 +50,14 @@ const ShowExpenses = () => {
   console.log(data2);
   return (
     <>
-      <h2>Gastos</h2>
-      <br />
-      <br />
       <Link to="/" className="btn btn-primary">
         Volver
       </Link>
       <br />
       <br />
+      <h2>Gastos</h2>
+      <br />
+
       {loading ? (
         <Loader />
       ) : (
@@ -70,8 +70,8 @@ const ShowExpenses = () => {
               </tr>
             </thead>
             <tbody>
-              {data2.map((ing) => (
-                <tr key={useId}>
+              {data2.map((ing, i) => (
+                <tr key={i}>
                   <td>{ing.cuenta_Egreso}</td>
                   <td>{ing.total}</td>
                 </tr>

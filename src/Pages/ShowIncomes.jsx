@@ -49,13 +49,13 @@ const ShowIncomes = () => {
 
   return (
     <>
-      <h2>Ingresos</h2>
-      <br />
-      <br />
       <Link to="/" className="btn btn-primary">
         Volver
       </Link>
       <br />
+      <br />
+      <h2>Ingresos</h2>
+
       <br />
       {loading ? (
         <Loader />
@@ -69,8 +69,8 @@ const ShowIncomes = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((ing) => (
-                <tr key={useId}>
+              {data.map((ing, i) => (
+                <tr key={i}>
                   <td>{ing.cuenta_Ingreso}</td>
                   <td>{ing.total}</td>
                 </tr>

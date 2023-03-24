@@ -21,23 +21,29 @@ const Home = ({ dataToEdit, setDataToEdit }) => {
     <div>
       <h1>Family App</h1>
       <div className="card">
-        <button className="btn btn-success" onClick={() => registroIngreso()}>
+        <button
+          className="btn btn-outline-success"
+          onClick={() => registroIngreso()}
+        >
           Registrar Ingresos
         </button>
         <button
-          className="btn btn-success"
+          className="btn btn-outline-success"
           onClick={() => navigate("/showIncomes")}
         >
           Ver Ingresos
         </button>
-        <button className="btn btn-danger" onClick={() => registroEgreso()}>
+        <button
+          className="btn btn-outline-danger"
+          onClick={() => registroEgreso()}
+        >
           Registrar Egreso
         </button>
-        <button className="btn btn-danger" onClick={() => verEgreso()}>
+        <button className="btn btn-outline-danger" onClick={() => verEgreso()}>
           Ver Egresos
         </button>
         <button
-          className="btn btn-danger"
+          className="btn btn-outline-primary"
           onClick={() => navigate("/statement")}
         >
           Generar Relación de Ingresos y Egresos
