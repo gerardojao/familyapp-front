@@ -1,19 +1,10 @@
-import React, { useState, useEffect, useId } from "react";
+import { useEffect, useState, useId } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 import Loader from "../Components/Loader";
 import api from "../Components/api";
-import {
-  Chart as ChartJS,
-  Colors,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Doughnut } from "react-chartjs-2";
 import { Link } from "react-router-dom";
 
-ChartJS.register(ArcElement, Colors, Tooltip, Legend);
-
-const ShowIncomes = () => {
+const StatementIncomeExpense = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showGraph, setshowGraph] = useState(false);
@@ -27,25 +18,6 @@ const ShowIncomes = () => {
   useEffect(() => {
     peticionGet();
   }, []);
-
-  const dataInfo = {
-    labels: data.map((item) => item.cuenta_Ingreso),
-    datasets: [
-      {
-        data: data.map((item) => item.total),
-        //backgroundColor: ["red", "blue", "yellow"],
-      },
-    ],
-  };
-
-  const opciones = {
-    responsive: true,
-    plugins: {
-      color: {
-        enabled: false,
-      },
-    },
-  };
 
   return (
     <>
@@ -77,24 +49,10 @@ const ShowIncomes = () => {
               ))}
             </tbody>
           </table>
-          <button
-            className="btn btn-success"
-            onClick={() => setshowGraph(!showGraph)}
-          >
-            {showGraph ? "Ocultar Gráfico" : "Generar Gráfico"}
-          </button>
-          {showGraph && (
-            <>
-              <div>
-                <Doughnut data={dataInfo} options={opciones} />
-              </div>
-              <br />
-            </>
-          )}
         </>
       )}
     </>
   );
 };
 
-export default ShowIncomes;
+export default StatementIncomeExpense;

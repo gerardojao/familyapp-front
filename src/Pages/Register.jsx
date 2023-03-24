@@ -4,10 +4,18 @@ import { Link, useNavigate } from "react-router-dom";
 
 import api from "../Components/api";
 
-const Register = ({ dataToEdit, setDataToEdit, income, setIncome }) => {
+const Register = ({
+  dataToEdit,
+  setDataToEdit,
+  income,
+  setIncome,
+  expense,
+  setExpense,
+}) => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [inc, setInc] = useState([]);
+  const [out, setOut] = useState([]);
   const Months = [
     "Enero",
     "Febrero",
@@ -22,14 +30,6 @@ const Register = ({ dataToEdit, setDataToEdit, income, setIncome }) => {
     "Noviembre",
     "Diciembre",
   ];
-  const [expense, setExpense] = useState({
-    Id: "",
-    Foto: "",
-    TipoEgreso: "",
-    Fecha: "",
-    Mes: "",
-    Importe: "",
-  });
 
   const handleChange2 = (e) => {
     const { name, value } = e.target;
@@ -49,7 +49,6 @@ const Register = ({ dataToEdit, setDataToEdit, income, setIncome }) => {
         [name]: value,
       };
     });
-    console.log(expense);
   };
 
   const RegistrarIngreso = async (e) => {
@@ -82,15 +81,15 @@ const Register = ({ dataToEdit, setDataToEdit, income, setIncome }) => {
     console.log("Registrar");
     try {
       if (
-        expense.Image === "" ||
-        expense.Month === "" ||
-        income.Amount === ""
+        expense.Foto === "" ||
+        expense.TipoIngreso == "" ||
+        expense.Mes === "" ||
+        expense.Importe === ""
       ) {
         console.error("Todos los campos son requeridos");
       } else {
-        delete income.Id;
         await api
-          .post("/FichaEgreso", expense)
+          .post("/FichaEgreso/Create", expense)
           .then((res) => console.log(data.concat(res.data)));
 
         alert("Registro exitoso");
@@ -105,14 +104,19 @@ const Register = ({ dataToEdit, setDataToEdit, income, setIncome }) => {
   const changeDataToEdit = () => {
     setDataToEdit(false);
     setIncome(income);
+    setExpense(expense);
   };
 
   const getIncomes = async () => {
     await api.get("/Ingreso").then((res) => setInc(data.concat(res.data.data)));
   };
+  const getOutcomes = async () => {
+    await api.get("/Egreso").then((res) => setOut(data.concat(res.data.data)));
+  };
 
   useEffect(() => {
     getIncomes();
+    getOutcomes();
   }, []);
 
   const convertirImagen = (file) => {
@@ -127,6 +131,8 @@ const Register = ({ dataToEdit, setDataToEdit, income, setIncome }) => {
     });
   };
   console.log(income);
+  console.log(out);
+  console.log(inc);
   return (
     <>
       {dataToEdit ? (
@@ -217,8 +223,10 @@ const Register = ({ dataToEdit, setDataToEdit, income, setIncome }) => {
               <label>Importe: </label>
               <br />
               <input
+                placeholder="0.00"
                 required
                 type="number"
+                step="0.01"
                 className="form-control"
                 name="Importe"
                 value={income.Importe}
@@ -230,70 +238,99 @@ const Register = ({ dataToEdit, setDataToEdit, income, setIncome }) => {
           </div>
         </form>
       ) : (
-        <form className="containerPrincipal" onSubmit={RegistrarEgreso}>
+        <form
+          className="containerPrincipal"
+          onClick={getOutcomes}
+          onSubmit={RegistrarEgreso}
+        >
           <Link to="/" className="btn btn-primary" onClick={changeDataToEdit}>
-            Inicio
+            Volver
           </Link>
           <br />
           <br />
+
           <div className="containerLogin">
-            <h2>Registrar Egreso</h2>
+            <h2>Registro de Gasto</h2>
             <br />
             <div className="form-group">
+              <select
+                // style={{ display: "none" }}
+                name="NombreIngreso"
+                className="form-control"
+                value={expense.NombreEgreso}
+                onChange={handleChange3}
+              >
+                {out.map((item) => (
+                  <option key={item.id}>{item.id}</option>
+                ))}
+              </select>
+
+              <label>Tipo de Egreso: </label>
+
+              <select
+                name="NombreIngreso"
+                className="form-control"
+                value={expense.NombreEgreso}
+                onChange={handleChange3}
+              >
+                <option value={"default"}>Selecciona el tipo de Egreso</option>
+                {out.map((item) => (
+                  <option key={item.id}>{item.nombre}</option>
+                ))}
+              </select>
+
+              <br />
               <label>Foto: </label>
               <br />
               <input
                 required
-                type="text"
+                onChangeCapture={(e) => convertirImagen(e.target.files)}
+                type="file"
                 className="form-control"
-                name="Image"
-                value={income.Image}
+                name="Foto"
+                value={expense.Foto}
                 onChange={handleChange3}
               />
               <br />
-
               <label>Fecha: </label>
               <br />
               <input
-                required
-                type="text"
+                type="date"
                 className="form-control"
-                name="Date"
-                value={income.Date}
+                name="Fecha"
+                value={expense.Fecha}
                 onChange={handleChange3}
               />
               <br />
-
               <label>Mes: </label>
               <br />
-              <input
+              <select
                 required
                 type="text"
                 className="form-control"
-                name="Month"
-                value={income.Month}
+                name="Mes"
+                value={expense.Mes}
                 onChange={handleChange3}
-              />
-              <br />
-              <label>Tipo de Ingreso: </label>
-              <br />
-              <input
-                required
-                type="text"
-                className="form-control"
-                name="LastName"
-                value={income.LastName}
-                onChange={handleChange3}
-              />
+              >
+                <option value={"default"}>
+                  Selecciona el mes de la factura
+                </option>
+                {Months.map((item) => (
+                  <option key={item.id}>{item}</option>
+                ))}
+              </select>
+
               <br />
               <label>Importe: </label>
               <br />
               <input
+                placeholder="0.00"
                 required
-                type="text"
+                type="number"
+                step="0.01"
                 className="form-control"
-                name="Amount"
-                value={income.Amount}
+                name="Importe"
+                value={expense.Importe}
                 onChange={handleChange3}
               />
               <br />

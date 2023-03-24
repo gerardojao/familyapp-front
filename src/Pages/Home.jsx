@@ -13,10 +13,10 @@ const Home = ({ dataToEdit, setDataToEdit }) => {
     setDataToEdit(false);
     navigate("/register");
   };
-  const verIngreso = () => {
-    // setDataToEdit(false);
-    navigate("/showIncomes");
+  const verEgreso = () => {
+    navigate("/showExpenses");
   };
+
   return (
     <div>
       <h1>Family App</h1>
@@ -24,11 +24,23 @@ const Home = ({ dataToEdit, setDataToEdit }) => {
         <button className="btn btn-success" onClick={() => registroIngreso()}>
           Registrar Ingresos
         </button>
-        <button className="btn btn-success" onClick={() => verIngreso()}>
+        <button
+          className="btn btn-success"
+          onClick={() => navigate("/showIncomes")}
+        >
           Ver Ingresos
         </button>
         <button className="btn btn-danger" onClick={() => registroEgreso()}>
           Registrar Egreso
+        </button>
+        <button className="btn btn-danger" onClick={() => verEgreso()}>
+          Ver Egresos
+        </button>
+        <button
+          className="btn btn-danger"
+          onClick={() => navigate("/statement")}
+        >
+          Generar Relación de Ingresos y Egresos
         </button>
       </div>
     </div>

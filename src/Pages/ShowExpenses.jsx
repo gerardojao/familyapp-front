@@ -13,14 +13,15 @@ import { Link } from "react-router-dom";
 
 ChartJS.register(ArcElement, Colors, Tooltip, Legend);
 
-const ShowIncomes = () => {
-  const [data, setData] = useState([]);
+const ShowExpenses = () => {
+  console.log("Hola");
+  const [data2, setData2] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showGraph, setshowGraph] = useState(false);
 
   const peticionGet = async () => {
-    const res = await api.get("/Ingreso/totales");
-    setData(res.data.data[0]);
+    const res = await api.get("/Egreso/totales");
+    setData2(res.data.data[0]);
     setLoading(false);
   };
 
@@ -29,10 +30,10 @@ const ShowIncomes = () => {
   }, []);
 
   const dataInfo = {
-    labels: data.map((item) => item.cuenta_Ingreso),
+    labels: data2.map((item) => item.cuenta_Egreso),
     datasets: [
       {
-        data: data.map((item) => item.total),
+        data: data2.map((item) => item.total),
         //backgroundColor: ["red", "blue", "yellow"],
       },
     ],
@@ -46,10 +47,10 @@ const ShowIncomes = () => {
       },
     },
   };
-
+  console.log(data2);
   return (
     <>
-      <h2>Ingresos</h2>
+      <h2>Gastos</h2>
       <br />
       <br />
       <Link to="/" className="btn btn-primary">
@@ -64,14 +65,14 @@ const ShowIncomes = () => {
           <table className="table table-bordered">
             <thead>
               <tr>
-                <th>TIPO DE INGRESO</th>
-                <th>TOTAL INGRESO</th>
+                <th>TIPO DE EGRESO</th>
+                <th>TOTAL EGRESO</th>
               </tr>
             </thead>
             <tbody>
-              {data.map((ing) => (
+              {data2.map((ing) => (
                 <tr key={useId}>
-                  <td>{ing.cuenta_Ingreso}</td>
+                  <td>{ing.cuenta_Egreso}</td>
                   <td>{ing.total}</td>
                 </tr>
               ))}
@@ -83,6 +84,8 @@ const ShowIncomes = () => {
           >
             {showGraph ? "Ocultar Gráfico" : "Generar Gráfico"}
           </button>
+          <br />
+          <br />
           {showGraph && (
             <>
               <div>
@@ -97,4 +100,4 @@ const ShowIncomes = () => {
   );
 };
 
-export default ShowIncomes;
+export default ShowExpenses;
