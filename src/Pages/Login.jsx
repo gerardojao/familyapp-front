@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
 import "../css/Login.css";
-import axios from "axios";
 
 import Swal from "sweetalert2";
 
@@ -63,12 +62,6 @@ const Login = ({ dataToEdit, setDataToEdit }) => {
 
     //     })
     try {
-      //  await supabase.auth.signIn({
-      //         email
-      // },
-      //  {
-      //         redirectTo:"https://userlogin.vercel.app/home"
-      //  })
       Toast.fire({
         icon: "success",
         title: "Email sent successfully",
@@ -82,7 +75,7 @@ const Login = ({ dataToEdit, setDataToEdit }) => {
     navigate("/register");
   };
   useEffect(() => {
-    supabase.auth.user() && navigate("/");
+    navigate("/");
   }, [navigate]);
 
   return (

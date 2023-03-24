@@ -4,26 +4,52 @@ import { Link, useNavigate } from "react-router-dom";
 
 import api from "../Components/api";
 
-const Register = ({ dataToEdit, setDataToEdit, user, setUser }) => {
+const Register = ({ dataToEdit, setDataToEdit, income, setIncome }) => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
-  const [user2, setUser2] = useState({
+  const [inc, setInc] = useState([]);
+  const Months = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+  const [expense, setExpense] = useState({
     Id: "",
-    FirstName: "",
-    LastName: "",
-    UserName: "",
-    Email: "",
+    Foto: "",
+    TipoEgreso: "",
+    Fecha: "",
+    Mes: "",
+    Importe: "",
   });
 
   const handleChange2 = (e) => {
     const { name, value } = e.target;
-    setUser((prevState) => {
+    setIncome((prevState) => {
       return {
         ...prevState,
         [name]: value,
       };
     });
-    console.log(user);
+  };
+
+  const handleChange3 = (e) => {
+    const { name, value } = e.target;
+    setExpense((prevState) => {
+      return {
+        ...prevState,
+        [name]: value,
+      };
+    });
+    console.log(expense);
   };
 
   const RegistrarIngreso = async (e) => {
@@ -31,21 +57,21 @@ const Register = ({ dataToEdit, setDataToEdit, user, setUser }) => {
     console.log("Registrar");
     try {
       if (
-        user.LastName === "" ||
-        user.Name === "" ||
-        user.Email === "" ||
-        user.UserName === ""
+        income.Foto === "" ||
+        income.TipoIngreso == "" ||
+        income.Mes === "" ||
+        income.Importe === ""
       ) {
         console.error("Todos los campos son requeridos");
       } else {
-        delete user.Id;
+        delete income.Id;
         await api
-          .post("/Users/Create", user)
+          .post("/FichaIngreso/Create", income)
           .then((res) => console.log(data.concat(res.data)));
 
         alert("Registro exitoso");
         navigate("/");
-        setUser(user2);
+        setIncome(income);
       }
     } catch (error) {
       console.error(error);
@@ -56,21 +82,20 @@ const Register = ({ dataToEdit, setDataToEdit, user, setUser }) => {
     console.log("Registrar");
     try {
       if (
-        user.LastName === "" ||
-        user.Name === "" ||
-        user.Email === "" ||
-        user.UserName === ""
+        expense.Image === "" ||
+        expense.Month === "" ||
+        income.Amount === ""
       ) {
         console.error("Todos los campos son requeridos");
       } else {
-        delete user.Id;
+        delete income.Id;
         await api
-          .post("/Users/Create", user)
+          .post("/FichaEgreso", expense)
           .then((res) => console.log(data.concat(res.data)));
 
         alert("Registro exitoso");
         navigate("/");
-        setUser(user2);
+        setExpense(expense);
       }
     } catch (error) {
       console.error(error);
@@ -79,41 +104,37 @@ const Register = ({ dataToEdit, setDataToEdit, user, setUser }) => {
 
   const changeDataToEdit = () => {
     setDataToEdit(false);
-    setUser(user2);
+    setIncome(income);
   };
 
-  //   const peticionPut = async (e) => {
-  //     e.preventDefault();
-  //     setDataToEdit(false);
-  //     // navigate("/home")
+  const getIncomes = async () => {
+    await api.get("/Ingreso").then((res) => setInc(data.concat(res.data.data)));
+  };
 
-  //     // let dataAux = data
-  //     await api
-  //       .put("/Users?Id=" + user.UserId, user)
-  //       .then((res) => {
-  //         data.map((elem) => {
-  //           console.log(elem.UserId, user.UserId);
-  //           if (elem.UserId === user.UserId) {
-  //             elem.Id = res.data.Id;
-  //             elem.Name = res.data.Name;
-  //             elem.LastName = res.data.LastName;
-  //             elem.Email = res.data.Email;
-  //             elem.UserName = res.data.UserName;
-  //             elem.UserId = res.data.UserId;
-  //           }
-  //         });
-  //         navigate("/");
-  //         setUser(user2);
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //       });
-  //   };
+  useEffect(() => {
+    getIncomes();
+  }, []);
 
+  const convertirImagen = (file) => {
+    Array.from(file).forEach((file) => {
+      let reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        var auxArr = [];
+        var base64 = reader.result;
+        auxArr = base64.split(",");
+      };
+    });
+  };
+  console.log(income);
   return (
     <>
       {dataToEdit ? (
-        <form className="containerPrincipal" onSubmit={RegistrarIngreso}>
+        <form
+          className="containerPrincipal"
+          onClick={getIncomes}
+          onSubmit={RegistrarIngreso}
+        >
           <Link to="/" className="btn btn-primary" onClick={changeDataToEdit}>
             Inicio
           </Link>
@@ -122,50 +143,85 @@ const Register = ({ dataToEdit, setDataToEdit, user, setUser }) => {
 
           <div className="containerLogin">
             <h2>Registro de Ingreso</h2>
+            <br />
             <div className="form-group">
-              <label>Usuario: </label>
-              <br />
-              <input
-                required
-                type="text"
+              <select
+                style={{ display: "none" }}
+                name="NombreIngreso"
                 className="form-control"
-                name="UserName"
-                value={user.UserName}
+                value={income.NombreIngreso}
                 onChange={handleChange2}
-              />
-              <br />
+              >
+                {inc.map((item) => (
+                  <option key={item.id}>{item.id}</option>
+                ))}
+                <option value={inc.id}>{inc.id}</option>
+              </select>
 
-              <label>Correo: </label>
-              <br />
-              <input
-                required
-                type="email"
-                className="form-control"
-                name="Email"
-                value={user.Email}
-                onChange={handleChange2}
-              />
-              <br />
+              <label>Tipo de Ingreso: </label>
 
-              <label>Nombre: </label>
+              <select
+                name="NombreIngreso"
+                className="form-control"
+                value={income.NombreIngreso}
+                onChange={handleChange2}
+              >
+                <option value={"default"}>Selecciona el tipo de Ingreso</option>
+                {inc.map((item) => (
+                  <option key={item.id}>{item.id}</option>
+                ))}
+              </select>
+
+              <br />
+              <label>Foto: </label>
               <br />
               <input
                 required
-                type="text"
+                onChangeCapture={(e) => convertirImagen(e.target.files)}
+                type="file"
                 className="form-control"
-                name="Name"
-                value={user.Name}
+                name="Foto"
+                value={income.Foto}
                 onChange={handleChange2}
               />
               <br />
-              <label>Apellido: </label>
+              <label>Fecha: </label>
               <br />
               <input
+                type="date"
+                className="form-control"
+                name="Fecha"
+                value={income.Fecha}
+                onChange={handleChange2}
+              />
+              <br />
+              <label>Mes: </label>
+              <br />
+              <select
                 required
                 type="text"
                 className="form-control"
-                name="LastName"
-                value={user.LastName}
+                name="Mes"
+                value={income.Mes}
+                onChange={handleChange2}
+              >
+                <option value={"default"}>
+                  Selecciona el mes de la factura
+                </option>
+                {Months.map((item) => (
+                  <option key={item.id}>{item}</option>
+                ))}
+              </select>
+
+              <br />
+              <label>Importe: </label>
+              <br />
+              <input
+                required
+                type="number"
+                className="form-control"
+                name="Importe"
+                value={income.Importe}
                 onChange={handleChange2}
               />
               <br />
@@ -184,49 +240,63 @@ const Register = ({ dataToEdit, setDataToEdit, user, setUser }) => {
             <h2>Registrar Egreso</h2>
             <br />
             <div className="form-group">
-              <label>Usuario: </label>
+              <label>Foto: </label>
               <br />
               <input
+                required
                 type="text"
                 className="form-control"
-                name="UserName"
-                value={user && user.UserName}
-                onChange={handleChange2}
+                name="Image"
+                value={income.Image}
+                onChange={handleChange3}
               />
               <br />
 
-              <label>Correo: </label>
+              <label>Fecha: </label>
               <br />
               <input
-                type="email"
+                required
+                type="text"
                 className="form-control"
-                name="Email"
-                value={user && user.Email}
-                onChange={handleChange2}
+                name="Date"
+                value={income.Date}
+                onChange={handleChange3}
               />
               <br />
 
-              <label>Nombre: </label>
+              <label>Mes: </label>
               <br />
               <input
+                required
                 type="text"
                 className="form-control"
-                name="Name"
-                value={user && user.Name}
-                onChange={handleChange2}
+                name="Month"
+                value={income.Month}
+                onChange={handleChange3}
               />
               <br />
-              <label>Apellido: </label>
+              <label>Tipo de Ingreso: </label>
               <br />
               <input
+                required
                 type="text"
                 className="form-control"
                 name="LastName"
-                value={user && user.LastName}
-                onChange={handleChange2}
+                value={income.LastName}
+                onChange={handleChange3}
               />
               <br />
-
+              <label>Importe: </label>
+              <br />
+              <input
+                required
+                type="text"
+                className="form-control"
+                name="Amount"
+                value={income.Amount}
+                onChange={handleChange3}
+              />
+              <br />
               <button className="btn btn-success">Registrar Egreso</button>
             </div>
           </div>

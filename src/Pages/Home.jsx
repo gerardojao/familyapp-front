@@ -13,12 +13,19 @@ const Home = ({ dataToEdit, setDataToEdit }) => {
     setDataToEdit(false);
     navigate("/register");
   };
+  const verIngreso = () => {
+    // setDataToEdit(false);
+    navigate("/showIncomes");
+  };
   return (
     <div>
       <h1>Family App</h1>
       <div className="card">
         <button className="btn btn-success" onClick={() => registroIngreso()}>
           Registrar Ingresos
+        </button>
+        <button className="btn btn-success" onClick={() => verIngreso()}>
+          Grafica Ingresos
         </button>
         <button className="btn btn-danger" onClick={() => registroEgreso()}>
           Registrar Egreso
