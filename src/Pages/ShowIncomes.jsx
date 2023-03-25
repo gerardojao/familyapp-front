@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useId } from "react";
+import React, { useState, useEffect } from "react";
 import Loader from "../Components/Loader";
 import api from "../Components/api";
 import {
@@ -8,10 +8,13 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Doughnut } from "react-chartjs-2";
 import { Link } from "react-router-dom";
+import "../css/show.css";
 
 ChartJS.register(ArcElement, Colors, Tooltip, Legend);
+ChartJS.register(ChartDataLabels);
 
 const ShowIncomes = () => {
   const [data, setData] = useState([]);
@@ -33,20 +36,36 @@ const ShowIncomes = () => {
     datasets: [
       {
         data: data.map((item) => item.total),
-        //backgroundColor: ["red", "blue", "yellow"],
       },
     ],
   };
 
   const opciones = {
     responsive: true,
+
     plugins: {
+      // tooltip: {
+      //   enabled: false,
+      // },
       color: {
         enabled: false,
       },
+      legend: { position: "left" },
+      datalabels: {
+        formatter: (value, context) => {
+          console.log(context.chart.config.data.datasets[0].data);
+          const datapoints = context.chart.config.data.datasets[0].data;
+          function totalSum(total, datapoint) {
+            return total + datapoint;
+          }
+          const totalValue = datapoints.reduce(totalSum, 0);
+          const percentageValue = ((value / totalValue) * 100).toFixed(1);
+          return `${percentageValue}%`;
+        },
+      },
     },
   };
-
+  console.log(data[0]);
   return (
     <>
       <Link to="/" className="btn btn-primary">
@@ -60,7 +79,7 @@ const ShowIncomes = () => {
       {loading ? (
         <Loader />
       ) : (
-        <>
+        <div className="containerGraphic">
           <table className="table table-bordered">
             <thead>
               <tr>
@@ -85,13 +104,13 @@ const ShowIncomes = () => {
           </button>
           {showGraph && (
             <>
-              <div>
+              <div className="graphic">
                 <Doughnut data={dataInfo} options={opciones} />
               </div>
               <br />
             </>
           )}
-        </>
+        </div>
       )}
     </>
   );

@@ -51,7 +51,7 @@ function Statement() {
       </Link>
       <br />
       <br />
-      <h2>Statement of Incomes and Expenses</h2>
+      <h2>Relación de Ingresos y Gastos</h2>
       <br />
       {loading ? (
         <Loader />
@@ -77,7 +77,7 @@ function Statement() {
               </tbody>
             </table>
 
-            <p>Total Ingresos: ${calculateTotalIncomes()}</p>
+            <p>Total Ingresos: ${calculateTotalIncomes().toFixed(2)}</p>
           </div>
 
           <div>
@@ -99,12 +99,12 @@ function Statement() {
                 ))}
               </tbody>
             </table>
-            <p>Total Gastos: ${calculateTotalExpenses()}</p>
+            <p>Total Gastos: ${calculateTotalExpenses().toFixed(2)}</p>
           </div>
           {totalBalance > 0 ? (
-            <h3>Ganancia: ${totalBalance}</h3>
+            <h3>Ganancia: ${totalBalance.toFixed(2)}</h3>
           ) : (
-            <h3>Perdida: ${totalBalance}</h3>
+            <h3>Perdida: ${totalBalance.toFixed(2)}</h3>
           )}
         </>
       )}

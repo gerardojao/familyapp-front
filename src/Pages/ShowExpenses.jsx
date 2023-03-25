@@ -10,6 +10,7 @@ import {
 } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import { Link } from "react-router-dom";
+import "../css/show.css";
 
 ChartJS.register(ArcElement, Colors, Tooltip, Legend);
 
@@ -42,8 +43,24 @@ const ShowExpenses = () => {
   const opciones = {
     responsive: true,
     plugins: {
+      // tooltip: {
+      //   enabled: false,
+      // },
       color: {
         enabled: false,
+      },
+      legend: { position: "left" },
+      datalabels: {
+        formatter: (value, context) => {
+          console.log(context.chart.config.data.datasets[0].data);
+          const datapoints = context.chart.config.data.datasets[0].data;
+          function totalSum(total, datapoint) {
+            return total + datapoint;
+          }
+          const totalValue = datapoints.reduce(totalSum, 0);
+          const percentageValue = ((value / totalValue) * 100).toFixed(1);
+          return `${percentageValue}%`;
+        },
       },
     },
   };
@@ -61,7 +78,7 @@ const ShowExpenses = () => {
       {loading ? (
         <Loader />
       ) : (
-        <>
+        <div className="containerGraphic">
           <table className="table table-bordered">
             <thead>
               <tr>
@@ -94,7 +111,7 @@ const ShowExpenses = () => {
               <br />
             </>
           )}
-        </>
+        </div>
       )}
     </>
   );

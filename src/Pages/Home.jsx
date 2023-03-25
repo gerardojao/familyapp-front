@@ -23,7 +23,7 @@ const Home = ({ dataToEdit, setDataToEdit }) => {
       <div className="card">
         <button
           className="btn btn-outline-success"
-          onClick={() => registroIngreso()}
+          onClick={() => navigate("/registerIncome")}
         >
           Registrar Ingresos
         </button>

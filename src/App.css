@@ -5,7 +5,9 @@
   text-align: center;
 }
 
-
+.graphic{
+  width:400px;
+}
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
