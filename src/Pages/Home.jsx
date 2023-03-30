@@ -34,6 +34,12 @@ const Home = ({ dataToEdit, setDataToEdit }) => {
           Ver Ingresos
         </button>
         <button
+          className="btn btn-outline-success"
+          onClick={() => navigate("/ingresosPorFecha")}
+        >
+          Ver Ingresos por rango de fecha
+        </button>
+        <button
           className="btn btn-outline-danger"
           onClick={() => registroEgreso()}
         >
@@ -41,6 +47,12 @@ const Home = ({ dataToEdit, setDataToEdit }) => {
         </button>
         <button className="btn btn-outline-danger" onClick={() => verEgreso()}>
           Ver Egresos
+        </button>
+        <button
+          className="btn btn-outline-danger"
+          onClick={() => navigate("/egresosPorFecha")}
+        >
+          Ver Egresos por rango de fecha
         </button>
         <button
           className="btn btn-outline-primary"

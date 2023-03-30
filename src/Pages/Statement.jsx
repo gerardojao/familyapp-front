@@ -58,12 +58,15 @@ function Statement() {
       ) : (
         <>
           <div>
-            <h3>Incomes</h3>
+            {/* <h3>INGRESOS</h3> */}
             <table className="table table-bordered">
               <thead>
                 <tr>
-                  <th>DESCRIPCIÓN DEL EGRESO</th>
-                  <th>TOTAL EGRESO</th>
+                  {/* <th>DESCRIPCIÓN DEL INGRESO</th>
+                  <th>TOTAL INGRESO</th> */}
+                  <th colSpan={2}>
+                    <h3>INGRESOS</h3>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -71,22 +74,27 @@ function Statement() {
                   <tr key={i}>
                     <td>{inc.cuenta_Ingreso}</td>
                     <td>{inc.total}</td>
-                    <td></td>
+                    {/* <td></td> */}
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            <p>Total Ingresos: ${calculateTotalIncomes().toFixed(2)}</p>
+            <p>
+              <b>Total Ingresos: {calculateTotalIncomes().toFixed(2)}</b>
+            </p>
           </div>
-
+          <br />
           <div>
-            <h3>Expenses</h3>
+            {/* <h3>GASTOS</h3> */}
             <table className="table table-bordered">
               <thead>
                 <tr>
-                  <th>DESCRIPCIÓN DEL EGRESO</th>
-                  <th>TOTAL EGRESO</th>
+                  {/* <th>DESCRIPCIÓN DEL EGRESO</th>
+                  <th>TOTAL EGRESO</th> */}
+                  <th colSpan={2}>
+                    <h3>GASTOS</h3>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -94,17 +102,24 @@ function Statement() {
                   <tr key={i}>
                     <td>{exp.cuenta_Egreso}</td>
                     <td>{exp.total}</td>
-                    <td></td>
+                    {/* <td></td> */}
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p>Total Gastos: ${calculateTotalExpenses().toFixed(2)}</p>
+            <p>
+              <b>Total Gastos: {calculateTotalExpenses().toFixed(2)}</b>
+            </p>
           </div>
+          <br />
           {totalBalance > 0 ? (
-            <h3>Ganancia: ${totalBalance.toFixed(2)}</h3>
+            <h3>
+              <b> Ganancia: ${totalBalance.toFixed(2)} </b>
+            </h3>
           ) : (
-            <h3>Perdida: ${totalBalance.toFixed(2)}</h3>
+            <h3>
+              <b>Perdida: ${totalBalance.toFixed(2)}</b>
+            </h3>
           )}
         </>
       )}

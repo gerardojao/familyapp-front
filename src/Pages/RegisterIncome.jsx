@@ -101,19 +101,6 @@ const RegisterIncome = ({ income, setIncome }) => {
         <h2>Registro de Ingreso</h2>
         <br />
         <div className="form-group">
-          {/* <select
-            // style={{ display: "none" }}
-            name="NombreIngreso"
-            className="form-control"
-            value={income.NombreIngreso}
-            onChange={handleChange}
-          >
-            <option value={"default"}>Selecciona el tipo de Ingreso</option>
-            {inc.map((item, i) => (
-              <option key={i}>{item.id}</option>
-            ))}
-          </select> */}
-
           <label>Tipo de Ingreso: </label>
 
           <select

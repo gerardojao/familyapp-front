@@ -7,6 +7,8 @@ import ShowIncomes from "./Pages/ShowIncomes";
 import ShowExpenses from "./Pages/ShowExpenses";
 import Statement from "./Pages/Statement.jsx";
 import RegisterIncome from "./Pages/RegisterIncome.jsx";
+import IncomeByMonth from "./Pages/IncomesByMont.jsx";
+import ExpensesByMonths from "./Pages/ExpenseByMonths.jsx";
 
 function App() {
   const [dataToEdit, setDataToEdit] = useState(null);
@@ -71,6 +73,8 @@ function App() {
           path="/register"
           element={<Register expense={expense} setExpense={setExpense} />}
         />
+        <Route path="/ingresosPorFecha" element={<IncomeByMonth />} />
+        <Route path="/egresosPorFecha" element={<ExpensesByMonths />} />
       </Routes>
     </BrowserRouter>
   );
