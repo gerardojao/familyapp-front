@@ -94,13 +94,10 @@ const ShowExpenses = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
-          <button
-            className="btn btn-success"
-            onClick={() => setshowGraph(!showGraph)}
-          >
-            {showGraph ? "Ocultar Gráfico" : "Generar Gráfico"}
-          </button>
+          </table>       
+        <button className="btn btn-success" onClick={()=>setshowGraph(!showGraph)}>
+          {showGraph ? "Ocultar Gráfico" : "Generar Gráfico"}
+        </button>
           <br />
           <br />
           {showGraph && (

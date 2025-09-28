@@ -1,155 +1,95 @@
-import React, { useState, useEffect } from "react";
-import Loader from "../Components/Loader";
+import React, { useEffect, useState } from "react";
 import api from "../Components/api";
-import {
-  Chart as ChartJS,
-  Colors,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import { Doughnut } from "react-chartjs-2";
 import { Link } from "react-router-dom";
-import "../css/show.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-
+import {
+  Chart as ChartJS, Colors, ArcElement, Tooltip, Legend
+} from "chart.js";
+import { Doughnut } from "react-chartjs-2";
 ChartJS.register(ArcElement, Colors, Tooltip, Legend);
-ChartJS.register(ChartDataLabels);
 
 const IncomeByMonth = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showGraph, setshowGraph] = useState(false);
-  const [fechaInicial, setFechaInicial] = useState("");
-  const [fechaFinal, setFechaFinal] = useState("");
+  const [rows, setRows] = useState([]);
+  const [showGraph, setShowGraph] = useState(false);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
 
-  const peticionGet = async () => {
-    const res = await api.get(
-      `/Ingreso/totalesPorMes/${fechaInicial}/${fechaFinal}`
-    );
-    setData(res.data.data[0]);
-    setLoading(false);
+  const fetchData = async () => {
+    try {
+      const url =
+        from && to
+          ? `/Ingreso/totalesPorMes?fechaInicio=${from}&fechaFin=${to}`
+          : `/Ingreso/totales`;
+      const res = await api.get(url);
+      setRows(res.data?.data?.[0] ?? []);
+    } catch (e) {
+      console.error(e);
+      setRows([]);
+    }
   };
 
-  useEffect(() => {
-    peticionGet();
-  }, [fechaFinal]);
+  useEffect(() => { fetchData(); }, []);
 
-  useEffect(() => {
-    peticionGet();
-  }, [fechaInicial]);
-
-  const cleanDate = () => {
-    setFechaFinal("");
-    setFechaInicial("");
+  const data = {
+    labels: rows.map(r => r.cuenta_Ingreso),
+    datasets: [{ data: rows.map(r => r.total) }],
   };
-  const dataInfo = {
-    labels: data.map((item) => item.cuenta_Ingreso),
-    datasets: [
-      {
-        data: data.map((item) => item.total),
-      },
-    ],
-  };
+console.log(data);
 
-  const opciones = {
+  const options = {
     responsive: true,
-
-    plugins: {
-      // tooltip: {
-      //   enabled: false,
-      // },
-      color: {
-        enabled: false,
-      },
-      legend: { position: "left" },
-      datalabels: {
-        formatter: (value, context) => {
-          console.log(context.chart.config.data.datasets[0].data);
-          const datapoints = context.chart.config.data.datasets[0].data;
-          function totalSum(total, datapoint) {
-            return total + datapoint;
-          }
-          const totalValue = datapoints.reduce(totalSum, 0);
-          const percentageValue = ((value / totalValue) * 100).toFixed(1);
-          return `${percentageValue}%`;
-        },
-      },
-    },
+    plugins: { legend: { position: "left" }, tooltip: { enabled: true } },
   };
-  console.log(data[0]);
-  console.log(fechaInicial, fechaFinal);
+
+  const onSubmit = (e) => { e.preventDefault(); fetchData(); };
+  const onClear  = () => { setFrom(""); setTo(""); fetchData(); };
+
   return (
     <>
-      <Link to="/" className="btn btn-primary">
-        Volver
-      </Link>
-      <br />
-      <br />
-      <h2>Ingresos</h2>
-      <br />
-      {/* {loading ? (
-        <Loader />
-      ) : ()   } */}
-      <div>
-        <form onSubmit={() => peticionGet()} className="form-group">
-          <label>
-            Desde:
-            <input
-              className="form-control"
-              type="date"
-              name="fecha"
-              value={fechaInicial}
-              onChange={(event) => setFechaInicial(event.target.value)}
-            />
-          </label>
-          <label>
-            Hasta:
-            <input
-              className="form-control"
-              type="date"
-              name="fecha"
-              value={fechaFinal}
-              onChange={(event) => setFechaFinal(event.target.value)}
-            />
-          </label>
-          <br />
-          <button onclick={() => cleanDate()}>Nueva Busqueda</button>
-        </form>
+      <Link to="/" className="btn btn-secondary mb-3">Volver</Link>
+      <h2 className="mb-3">Ingresos por rango de fecha</h2>
 
-        <br />
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>TIPO DE INGRESO</th>
-              <th>TOTAL INGRESO</th>
-            </tr>
-          </thead>
+      <form className="row g-2 align-items-end" onSubmit={onSubmit}>
+        <div className="col-sm-3">
+          <label className="form-label">Desde</label>
+          <input type="date" className="form-control"
+                 value={from} onChange={e=>setFrom(e.target.value)} />
+        </div>
+        <div className="col-sm-3">
+          <label className="form-label">Hasta</label>
+          <input type="date" className="form-control"
+                 value={to} onChange={e=>setTo(e.target.value)} />
+        </div>
+        <div className="col-sm-auto">
+          <button className="btn btn-primary" type="submit">Buscar</button>
+        </div>
+        <div className="col-sm-auto">
+          <button className="btn btn-outline-secondary" type="button" onClick={onClear}>Limpiar</button>
+        </div>
+      </form>
+
+      <div className="my-3 table-responsive">
+        <table className="table table-striped align-middle">
+          <thead><tr><th>Tipo de ingreso</th><th>Total</th></tr></thead>
           <tbody>
-            {data.map((ing, i) => (
-              <tr key={i}>
-                <td>{ing.cuenta_Ingreso}</td>
-                <td>{ing.total}</td>
-              </tr>
+            {rows.map((r,i)=>(
+              <tr key={i}><td>{r.cuenta_Ingreso}</td><td>{r.total}</td></tr>
             ))}
+            {rows.length===0 && (
+              <tr><td colSpan={2} className="text-muted">Sin resultados</td></tr>
+            )}
           </tbody>
         </table>
-        <button
-          className="btn btn-success"
-          onClick={() => setshowGraph(!showGraph)}
-        >
-          {showGraph ? "Ocultar Gráfico" : "Generar Gráfico"}
-        </button>
-        {showGraph && (
-          <>
-            <div className="graphic">
-              <Doughnut data={dataInfo} options={opciones} />
-            </div>
-            <br />
-          </>
-        )}
       </div>
+
+      <button className="btn btn-success mb-3" onClick={()=>setShowGraph(v=>!v)}>
+        {showGraph ? "Ocultar gráfico" : "Mostrar gráfico"}
+      </button>
+
+      {showGraph && (
+        <div style={{maxWidth: 420}}>
+          <Doughnut data={data} options={options} />
+        </div>
+      )}
     </>
   );
 };

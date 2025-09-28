@@ -1,17 +1,20 @@
-import { useState } from "react";
+// src/App.jsx
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./Pages/Home.jsx";
-import "./App.css";
-import Register from "./Pages/Register.jsx";
+import { useState } from "react";
+import Layout from "./Components/Layout";
+import Home from "./Pages/Home";
+import Register from "./Pages/Register";
+import RegisterIncome from "./Pages/RegisterIncome";
 import ShowIncomes from "./Pages/ShowIncomes";
 import ShowExpenses from "./Pages/ShowExpenses";
-import Statement from "./Pages/Statement.jsx";
-import RegisterIncome from "./Pages/RegisterIncome.jsx";
-import IncomeByMonth from "./Pages/IncomesByMont.jsx";
-import ExpensesByMonths from "./Pages/ExpenseByMonths.jsx";
+import Statement from "./Pages/Statement";
+import IncomeByMonth from "./Pages/IncomesByMont";
+import ExpensesByMonths from "./Pages/ExpenseByMonths";
+import IncomeDetails from "./Pages/IncomeDetails.jsx";
+import ExpenseDetails from "./Pages/ExpenseDetails.jsx";
+import "./App.css";
 
 function App() {
-  const [dataToEdit, setDataToEdit] = useState(null);
   const [income, setIncome] = useState({
     Id: "",
     Foto: "",
@@ -20,6 +23,7 @@ function App() {
     Importe: "",
     NombreIngreso: "",
   });
+
   const [expense, setExpense] = useState({
     Foto: "",
     Fecha: "",
@@ -30,54 +34,21 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              dataToEdit={dataToEdit}
-              setDataToEdit={setDataToEdit}
-              income={income}
-              setIncome={setIncome}
-            />
-          }
-        />
-
-        <Route
-          path="/register"
-          element={
-            <Register
-              dataToEdit={dataToEdit}
-              setDataToEdit={setDataToEdit}
-              income={income}
-              setIncome={setIncome}
-              expense={expense}
-              setExpense={setExpense}
-            />
-          }
-        />
-        <Route
-          path="/showIncomes"
-          element={<ShowIncomes income={income} setIncome={setIncome} />}
-        />
-        <Route
-          path="/showExpenses"
-          element={<ShowExpenses expense={expense} setExpense={setExpense} />}
-        />
-        <Route path="/statement" element={<Statement />} />
-        <Route
-          path="/registerIncome"
-          element={<RegisterIncome income={income} setIncome={setIncome} />}
-        />
-        <Route
-          path="/register"
-          element={<Register expense={expense} setExpense={setExpense} />}
-        />
-        <Route path="/ingresosPorFecha" element={<IncomeByMonth />} />
-        <Route path="/egresosPorFecha" element={<ExpensesByMonths />} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/register-income" element={<RegisterIncome income={income} setIncome={setIncome} />} />
+          <Route path="/register-expense" element={<Register expense={expense} setExpense={setExpense} />} />
+          <Route path="/showIncomes" element={<ShowIncomes />} />
+          <Route path="/showExpenses" element={<ShowExpenses />} />
+          <Route path="/statement" element={<Statement />} />
+          <Route path="/ingresosPorFecha" element={<IncomeByMonth />} />
+          <Route path="/egresosPorFecha" element={<ExpensesByMonths />} />
+          <Route path="/ingresos-detalle" element={<IncomeDetails />} />
+          <Route path="/egresos-detalle" element={<ExpenseDetails />} />
+        </Routes>
+      </Layout>
     </BrowserRouter>
   );
 }
-
 export default App;

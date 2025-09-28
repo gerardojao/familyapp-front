@@ -1,175 +1,142 @@
+// src/Pages/Register.jsx
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Link, useNavigate } from "react-router-dom";
-
 import api from "../Components/api";
 
-const Register = ({ income, setIncome, expense, setExpense }) => {
-  const navigate = useNavigate();
-  const [data, setData] = useState([]);
+const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-  const [out, setOut] = useState([]);
-  const Months = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ];
+const Register = ({ expense, setExpense }) => {
+  const navigate = useNavigate();
+  const [outTypes, setOutTypes] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setExpense((prevState) => {
-      return {
-        ...prevState,
-        [name]: value,
-      };
-    });
+    setExpense(prev => ({ ...prev, [name]: value }));
+  };
+
+  const convertirImagen = (fileList) => {
+    const file = fileList?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = String(reader.result);
+      setExpense(prev => ({ ...prev, Foto: base64 }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const RegistrarEgreso = async (e) => {
     e.preventDefault();
-    console.log("Registrar");
     try {
-      if (
-        expense.Foto === "" ||
-        expense.TipoIngreso == "" ||
-        expense.Mes === "" ||
-        expense.Importe === ""
-      ) {
-        console.error("Todos los campos son requeridos");
-      } else {
-        await api
-          .post("/FichaEgreso", expense)
-          .then((res) => console.log(data.concat(res.data)));
-
-        alert("Registro exitoso");
-        navigate("/");
-        setExpense(expense);
+      if (!expense.NombreEgreso || !expense.Mes || !expense.Importe) {
+        return alert("Completa los campos obligatorios.");
       }
-    } catch (error) {
-      console.error(error);
+
+      // 🔑 El backend espera int en NombreEgreso (FK) y decimal en Importe
+      const payload = {
+        Foto: expense.Foto || null,
+        Fecha: expense.Fecha || null,        // "YYYY-MM-DD" sirve para DateTime
+        Mes: expense.Mes,
+        Importe: Number(expense.Importe),
+        NombreEgreso: Number(expense.NombreEgreso) // <-- ID del egreso
+      };
+
+      await api.post("/FichaEgreso", payload);
+      alert("Registro exitoso");
+      navigate("/");
+
+      // opcional: limpiar
+      // setExpense({ Foto:"", Fecha:"", Mes:"", Importe:"", NombreEgreso:"" });
+    } catch (err) {
+      console.error(err);
+      const msg = err?.response?.data?.message || err?.message || "Error";
+      alert("No se pudo registrar el gasto: " + msg);
     }
   };
 
   const getOutcomes = async () => {
-    await api.get("/Egreso").then((res) => setOut(data.concat(res.data.data)));
+    const res = await api.get("/Egreso"); // devuelve { Ok, Data:[{Id, Nombre}], Message }
+    setOutTypes(res.data?.data || []);
   };
 
-  useEffect(() => {
-    getOutcomes();
-  }, []);
+  useEffect(()=>{ getOutcomes(); }, []);
 
-  const convertirImagen = (file) => {
-    Array.from(file).forEach((file) => {
-      let reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        var auxArr = [];
-        var base64 = reader.result;
-        auxArr = base64.split(",");
-      };
-    });
-  };
-  console.log(expense);
   return (
-    <>
-      <form
-        className="containerPrincipal"
-        onClick={getOutcomes}
-        onSubmit={RegistrarEgreso}
-      >
-        <Link to="/" className="btn btn-primary">
-          Volver
-        </Link>
-        <br />
-        <br />
+    <form className="containerPrincipal" onSubmit={RegistrarEgreso}>
+      <Link to="/" className="btn btn-secondary mb-3">Volver</Link>
+      <div className="card shadow-sm">
+        <div className="card-body">
+          <h2 className="h4">Registro de Gasto</h2>
 
-        <div className="containerLogin">
-          <h2>Registro de Gasto</h2>
-          <br />
-          <div className="form-group">
-            <label>Tipo de Egreso: </label>
-
+          <div className="form-group mb-3">
+            <label>Tipo de egreso</label>
             <select
               name="NombreEgreso"
               className="form-control"
-              // value={expense.NombreEgreso}
+              value={expense.NombreEgreso}
               onChange={handleChange}
             >
-              <option value={"default"}>Selecciona el tipo de Egreso</option>
-              {out.map((item, i) => (
-                <option value={item.id} key={item.id}>
-                  {item.nombre}
+              <option value="">Selecciona…</option>
+              {outTypes.map(o => (
+                <option key={o.id} value={o.id}>
+                  {o.nombre}
                 </option>
               ))}
             </select>
+          </div>
 
-            <br />
-            <label>Foto: </label>
-            <br />
+          <div className="form-group mb-3">
+            <label>Foto (opcional)</label>
             <input
-              required
-              onChangeCapture={(e) => convertirImagen(e.target.files)}
               type="file"
               className="form-control"
-              name="Foto"
-              value={expense.Foto}
-              onChange={handleChange}
+              accept="image/*"
+              onChange={(e)=>convertirImagen(e.target.files)}
             />
-            <br />
-            <label>Fecha: </label>
-            <br />
-            <input
-              type="date"
-              className="form-control"
-              name="Fecha"
-              value={expense.Fecha}
-              onChange={handleChange}
-            />
-            <br />
-            <label>Mes: </label>
-            <br />
-            <select
-              required
-              type="text"
-              className="form-control"
-              name="Mes"
-              value={expense.Mes}
-              onChange={handleChange}
-            >
-              <option value={"default"}>Selecciona el mes de la factura</option>
-              {Months.map((item) => (
-                <option key={item.id}>{item}</option>
-              ))}
-            </select>
-
-            <br />
-            <label>Importe: </label>
-            <br />
-            <input
-              placeholder="0.00"
-              required
-              type="number"
-              step="0.01"
-              className="form-control"
-              name="Importe"
-              value={expense.Importe}
-              onChange={handleChange}
-            />
-            <br />
-            <button className="btn btn-success">Registrar Egreso</button>
           </div>
+
+          <div className="row">
+            <div className="col-md-4 mb-3">
+              <label>Fecha</label>
+              <input
+                type="date"
+                className="form-control"
+                name="Fecha"
+                value={expense.Fecha}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="col-md-4 mb-3">
+              <label>Mes</label>
+              <select
+                className="form-control"
+                name="Mes"
+                value={expense.Mes}
+                onChange={handleChange}
+              >
+                <option value="">Selecciona…</option>
+                {months.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+            <div className="col-md-4 mb-3">
+              <label>Importe</label>
+              <input
+                type="number"
+                step="0.01"
+                className="form-control"
+                name="Importe"
+                value={expense.Importe}
+                onChange={handleChange}
+                placeholder="0,00"
+              />
+            </div>
+          </div>
+
+          <button className="btn btn-danger">Registrar egreso</button>
         </div>
-      </form>
-    </>
+      </div>
+    </form>
   );
 };
 

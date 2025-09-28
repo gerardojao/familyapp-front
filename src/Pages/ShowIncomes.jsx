@@ -32,7 +32,7 @@ const ShowIncomes = () => {
   }, []);
 
   const dataInfo = {
-    labels: data.map((item) => item.cuenta_Ingreso),
+    labels: data.map(item => item.cuenta_Ingreso),
     datasets: [
       {
         data: data.map((item) => item.total),
@@ -96,12 +96,10 @@ const ShowIncomes = () => {
               ))}
             </tbody>
           </table>
-          <button
-            className="btn btn-success"
-            onClick={() => setshowGraph(!showGraph)}
-          >
-            {showGraph ? "Ocultar Gráfico" : "Generar Gráfico"}
-          </button>
+        <button className="btn btn-success" onClick={()=>setshowGraph(!showGraph)}>
+          {showGraph ? "Ocultar Gráfico" : "Generar Gráfico"}
+        </button>
+
           {showGraph && (
             <>
               <div className="graphic">

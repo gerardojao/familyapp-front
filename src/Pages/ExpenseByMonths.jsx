@@ -1,149 +1,83 @@
-import React, { useState, useEffect } from "react";
-import Loader from "../Components/Loader";
+// src/Pages/ExpenseByMonths.jsx
+import React, { useEffect, useState } from "react";
 import api from "../Components/api";
-import {
-  Chart as ChartJS,
-  Colors,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import { Doughnut } from "react-chartjs-2";
 import { Link } from "react-router-dom";
-import "../css/show.css";
-
+import DateRange from "../Components/DateRange";
+import DonutCard from "../Components/DonutCard";
+import {
+  Chart as ChartJS, Colors, ArcElement, Tooltip, Legend
+} from "chart.js";
 ChartJS.register(ArcElement, Colors, Tooltip, Legend);
-ChartJS.register(ChartDataLabels);
 
 const ExpenseByMonths = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showGraph, setshowGraph] = useState(false);
-  const [fechaInicial, setFechaInicial] = useState("");
-  const [fechaFinal, setFechaFinal] = useState("");
+  const [rows, setRows] = useState([]);
+  const [showGraph, setShowGraph] = useState(false);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
 
-  const peticionGet = async () => {
-    const res = await api.get(
-      `/Egreso/totalesPorMes${fechaInicial}/${fechaFinal}`
-    );
-    setData(res.data.data[0]);
-    setLoading(false);
+  const fetchData = async () => {
+    try {
+      const url =
+        from && to
+          ? `/Egreso/totalesPorMes?fechaInicio=${from}&fechaFin=${to}`
+          : `/Egreso/totales`;  
+      
+      const res = await api.get(url);      
+      setRows(res.data?.data?.[0] ?? []);
+      console.log(rows);
+    } catch (e) {
+      console.error(e);
+      setRows([]);
+    }
   };
 
-  useEffect(() => {
-    peticionGet();
-  }, [fechaFinal]);
+  useEffect(()=>{ fetchData(); }, []); // primera carga
 
-  const cleanDate = () => {
-    setFechaFinal("");
-    setFechaInicial("");
+  const data = {
+    labels: rows.map(r => r.cuenta_Egreso),
+    datasets: [{ data: rows.map(r => r.total) }],
   };
+console.log(data);
 
-  const dataInfo = {
-    labels: data.map((item) => item.cuenta_Ingreso),
-    datasets: [
-      {
-        data: data.map((item) => item.total),
-      },
-    ],
-  };
-
-  const opciones = {
+  const options = {
     responsive: true,
-
     plugins: {
-      // tooltip: {
-      //   enabled: false,
-      // },
-      color: {
-        enabled: false,
-      },
       legend: { position: "left" },
-      datalabels: {
-        formatter: (value, context) => {
-          console.log(context.chart.config.data.datasets[0].data);
-          const datapoints = context.chart.config.data.datasets[0].data;
-          function totalSum(total, datapoint) {
-            return total + datapoint;
-          }
-          const totalValue = datapoints.reduce(totalSum, 0);
-          const percentageValue = ((value / totalValue) * 100).toFixed(1);
-          return `${percentageValue}%`;
-        },
-      },
+      tooltip: { enabled: true },
     },
   };
+console.log(rows);
 
   return (
     <>
-      <Link to="/" className="btn btn-primary">
-        Volver
-      </Link>
-      <br />
-      <br />
-      <h2>Egresos</h2>
-      <br />
-      {/* {loading ? (
-        <Loader />
-      ) : ()   } */}
-      <div className="containerGraphic">
-        <form onSubmit={() => peticionGet()}>
-          <label>
-            Desde:
-            <input
-              type="date"
-              name="fecha"
-              value={fechaInicial}
-              onChange={(event) => setFechaInicial(event.target.value)}
-            />
-          </label>
-          <label>
-            Hasta:
-            <input
-              type="date"
-              name="fecha"
-              value={fechaFinal}
-              onChange={(event) => setFechaFinal(event.target.value)}
-            />
-          </label>
-          <br />
-          <button onclick={() => cleanDate()}>Nueva Busqueda</button>
-        </form>
+      <Link to="/" className="btn btn-secondary mb-3">Volver</Link>
+      <h2 className="mb-3">Gastos por rango de fecha</h2>
 
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>TIPO DE EGRESO</th>
-              <th>TOTAL EGRESO</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((ing, i) => (
-              <tr key={i}>
-                <td>{ing.cuenta_Egreso}</td>
-                <td>{ing.total}</td>
-              </tr>
-            ))}
-          </tbody>
+      <DateRange
+        from={from} to={to}
+        onChangeFrom={setFrom} onChangeTo={setTo}
+        onSubmit={fetchData}
+        onClear={()=>{ setFrom(""); setTo(""); fetchData(); }}
+      />
+
+      <div className="my-3 table-responsive">
+        <table className="table table-striped align-middle">
+          <thead><tr><th>Tipo de egreso</th><th>Total</th></tr></thead>
+        <tbody>
+          {rows.map((r,i)=>(
+            <tr key={i}><td>{r.cuenta_Egreso}</td><td>{r.total}</td></tr>
+          ))}
+          {rows.length===0 && <tr><td colSpan={2} className="text-muted">Sin resultados</td></tr>}
+        </tbody>
         </table>
-        <button
-          className="btn btn-success"
-          onClick={() => setshowGraph(!showGraph)}
-        >
-          {showGraph ? "Ocultar Gráfico" : "Generar Gráfico"}
-        </button>
-        {showGraph && (
-          <>
-            <div className="graphic">
-              <Doughnut data={dataInfo} options={opciones} />
-            </div>
-            <br />
-          </>
-        )}
       </div>
+
+      <button className="btn btn-success mb-3" onClick={()=>setShowGraph(v=>!v)}>
+        {showGraph ? "Ocultar gráfico" : "Mostrar gráfico"}
+      </button>
+
+      {showGraph && <DonutCard title="Distribución de gastos" data={data} options={options} />}
     </>
   );
 };
-
 export default ExpenseByMonths;
