@@ -1,15 +1,14 @@
-import React from 'react'
-import "./Loader.css"
-const Loader = () => {
-  return (
-    <div >
-      <div className="lds-ring">
-        <h3>Loading</h3>
-          <div></div>
-          <div></div>
-     </div>
-    </div>
-  )
-}
+import React from "react";
+import "./Loader.css";
 
-export default Loader
+export default function Loader({ label = "Cargando..." }) {
+  return (
+    <div className="fa-loader-wrap" role="status" aria-live="polite">
+      <div className="lds-ring" aria-hidden="true">
+        <div></div>
+        <div></div>
+      </div>
+      <span className="fa-loader-text">{label}</span>
+    </div>
+  );
+}

@@ -1,4 +1,4 @@
-:root {
+/* :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -69,4 +69,57 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+} */
+/* === Tailwind entry points === */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==== BASE (global mínimo) ==== */
+@layer base {
+  html, body, #root { height: 100%; }
+  body { @apply text-slate-800 antialiased; } /* tipografía limpia */
+}
+
+/* ==== COMPONENTS (utilidades que ya usamos en tu UI) ==== */
+@layer components {
+  /* Tarjetas */
+  .card         { @apply rounded-2xl bg-white shadow-sm border border-slate-200 p-4; }
+
+  /* Botones */
+  .btn          { @apply inline-flex items-center gap-2 rounded-xl px-4 py-2.5 shadow transition; }
+  .btn-emerald  { @apply btn bg-emerald-600 text-white hover:bg-emerald-700; }
+  .btn-sky      { @apply btn bg-sky-600 text-white hover:bg-sky-700; }
+  .btn-ghost    { @apply btn bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50; }
+  .btn-block    { @apply w-full justify-center; }
+  .btn-lg       { @apply py-3 text-base; }
+
+  /* Badges */
+  .badge        { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset; }
+  .badge-green  { @apply badge bg-emerald-50 text-emerald-700 ring-emerald-200; }
+  .badge-red    { @apply badge bg-rose-50 text-rose-700 ring-rose-200; }
+
+  /* KPIs */
+  .kpi-label    { @apply text-sm text-slate-500; }
+  .kpi-value    { @apply text-2xl font-semibold text-slate-900 mt-1; }
+
+  /* Formularios */
+  .label        { @apply block text-sm font-medium text-slate-700; }
+  .input        { @apply w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400; }
+  .select       { @apply input; }
+  .textarea     { @apply input; }
+
+  /* Tablas */
+  .table-wrap   { @apply rounded-xl border border-slate-200 overflow-x-auto; }
+  .table        { @apply min-w-full text-sm; }
+  .th           { @apply text-left text-slate-500 py-2 px-3; }
+  .td           { @apply py-2 px-3; }
+  .tr           { @apply border-t border-slate-200/70 hover:bg-slate-50; }
+}
+
+/* ==== Helpers puntuales que ya usabas ==== */
+.graphic { width: 420px; } /* si la sigues usando */
+
+@layer utilities {
+  .container-app { @apply mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8; }
 }

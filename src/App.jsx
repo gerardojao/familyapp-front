@@ -12,7 +12,7 @@ import IncomeByMonth from "./Pages/IncomesByMont";
 import ExpensesByMonths from "./Pages/ExpenseByMonths";
 import IncomeDetails from "./Pages/IncomeDetails.jsx";
 import ExpenseDetails from "./Pages/ExpenseDetails.jsx";
-import "./App.css";
+
 
 function App() {
   const [income, setIncome] = useState({

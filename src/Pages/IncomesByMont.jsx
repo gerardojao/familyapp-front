@@ -1,3 +1,4 @@
+// src/Pages/IncomeByMonths.jsx
 import React, { useEffect, useState } from "react";
 import api from "../Components/api";
 import { Link } from "react-router-dom";
@@ -5,9 +6,12 @@ import {
   Chart as ChartJS, Colors, ArcElement, Tooltip, Legend
 } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+
 ChartJS.register(ArcElement, Colors, Tooltip, Legend);
 
-const IncomeByMonth = () => {
+const eur = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
+
+export default function IncomeByMonth() {
   const [rows, setRows] = useState([]);
   const [showGraph, setShowGraph] = useState(false);
   const [from, setFrom] = useState("");
@@ -33,11 +37,14 @@ const IncomeByMonth = () => {
     labels: rows.map(r => r.cuenta_Ingreso),
     datasets: [{ data: rows.map(r => r.total) }],
   };
-console.log(data);
 
   const options = {
     responsive: true,
-    plugins: { legend: { position: "left" }, tooltip: { enabled: true } },
+    maintainAspectRatio: false, // permite controlar altura con Tailwind
+    plugins: {
+      legend: { position: "left" },
+      tooltip: { enabled: true },
+    },
   };
 
   const onSubmit = (e) => { e.preventDefault(); fetchData(); };
@@ -45,53 +52,89 @@ console.log(data);
 
   return (
     <>
-      <Link to="/" className="btn btn-secondary mb-3">Volver</Link>
-      <h2 className="mb-3">Ingresos por rango de fecha</h2>
+      {/* Cabecera + volver */}
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h2 className="text-2xl font-semibold text-slate-900">Ingresos por rango de fecha</h2>
+        <Link to="/" className="btn-ghost">Volver</Link>
+      </div>
 
-      <form className="row g-2 align-items-end" onSubmit={onSubmit}>
-        <div className="col-sm-3">
-          <label className="form-label">Desde</label>
-          <input type="date" className="form-control"
-                 value={from} onChange={e=>setFrom(e.target.value)} />
-        </div>
-        <div className="col-sm-3">
-          <label className="form-label">Hasta</label>
-          <input type="date" className="form-control"
-                 value={to} onChange={e=>setTo(e.target.value)} />
-        </div>
-        <div className="col-sm-auto">
-          <button className="btn btn-primary" type="submit">Buscar</button>
-        </div>
-        <div className="col-sm-auto">
-          <button className="btn btn-outline-secondary" type="button" onClick={onClear}>Limpiar</button>
+      {/* Filtros */}
+      <form className="card p-4 mb-4" onSubmit={onSubmit}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div>
+            <label className="label" htmlFor="from">Desde</label>
+            <input
+              id="from"
+              type="date"
+              className="input"
+              value={from}
+              onChange={e=>setFrom(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="label" htmlFor="to">Hasta</label>
+            <input
+              id="to"
+              type="date"
+              className="input"
+              value={to}
+              onChange={e=>setTo(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2 md:col-span-2">
+            <button className="btn-emerald" type="submit">Buscar</button>
+            <button className="btn-ghost" type="button" onClick={onClear}>Limpiar</button>
+          </div>
         </div>
       </form>
 
-      <div className="my-3 table-responsive">
-        <table className="table table-striped align-middle">
-          <thead><tr><th>Tipo de ingreso</th><th>Total</th></tr></thead>
-          <tbody>
-            {rows.map((r,i)=>(
-              <tr key={i}><td>{r.cuenta_Ingreso}</td><td>{r.total}</td></tr>
-            ))}
-            {rows.length===0 && (
-              <tr><td colSpan={2} className="text-muted">Sin resultados</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <button className="btn btn-success mb-3" onClick={()=>setShowGraph(v=>!v)}>
-        {showGraph ? "Ocultar gráfico" : "Mostrar gráfico"}
-      </button>
-
-      {showGraph && (
-        <div style={{maxWidth: 420}}>
-          <Doughnut data={data} options={options} />
+      {/* Tabla */}
+      <section className="card p-4 mb-4">
+        <div className="table-wrap">
+          <table className="table">
+            <thead className="bg-slate-50">
+              <tr className="text-left text-slate-500">
+                <th className="th">Tipo de ingreso</th>
+                <th className="th text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r,i)=>(
+                <tr key={i} className="tr">
+                  <td className="td">{r.cuenta_Ingreso}</td>
+                  <td className="td text-right font-semibold text-emerald-700">
+                    {eur.format(r.total ?? 0)}
+                  </td>
+                </tr>
+              ))}
+              {rows.length===0 && (
+                <tr>
+                  <td className="td text-slate-500" colSpan={2}>Sin resultados</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
+
+        <div className="mt-4">
+          <button
+            className={showGraph ? "btn-ghost" : "btn-emerald"}
+            onClick={()=>setShowGraph(v=>!v)}
+          >
+            {showGraph ? "Ocultar gráfico" : "Mostrar gráfico"}
+          </button>
+        </div>
+      </section>
+
+      {/* Gráfico */}
+      {showGraph && (
+        <section className="card p-4">
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Distribución de ingresos</h3>
+          <div className="h-[28rem] md:h-[32rem]">
+            <Doughnut data={data} options={options} />
+          </div>
+        </section>
       )}
     </>
   );
-};
-
-export default IncomeByMonth;
+}

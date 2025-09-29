@@ -1,207 +1,189 @@
 import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import api from "../Components/api";
+import { soloFecha } from "../utils/date";
 
-const months = [
-  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
-];
+const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-const RegisterIncome = ({ income, setIncome }) => {
+const EMPTY_INCOME = {
+  Id: "", Foto: "", Fecha: "", Mes: "", Importe: "",
+  NombreIngreso: "", IngresoId: "", Descripcion: "",
+};
+
+export default function RegisterIncome({ income, setIncome }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state || {};
+  const record = state.record;
+  // ✅ Edición solo si viene marcado por state y con id claro
+  const isEdit = Boolean(state.edit === true && (state.id || record?.id));
+
   const [incTypes, setIncTypes] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
-  // ---- helpers
-  const setField = (name, value) => setIncome((prev) => ({ ...prev, [name]: value }));
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setField(name, value);
-  };
+  const setField = (name, value) => setIncome(prev => ({ ...prev, [name]: value }));
+  const handleChange = (e) => setField(e.target.name, e.target.value);
 
   const handleTipoIngresoChange = (e) => {
-    const value = e.target.value;            // id seleccionado (string)
+    const value = e.target.value;
     const selected = incTypes.find(t => String(t.id) === String(value));
-    // Guardamos ambos: id y nombre
     setField("IngresoId", value);
     setField("NombreIngreso", selected?.nombreIngreso || "");
   };
 
-  const convertirImagen = (fileList) => {
-    const file = fileList?.[0];
-    if (!file) return;
+  const convertirImagen = (files) => {
+    const file = files?.[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setField("Foto", String(reader.result)); // dataURL base64
+    reader.onload = () => setField("Foto", String(reader.result));
     reader.readAsDataURL(file);
   };
 
-  const loadTiposIngreso = async () => {
-    // Tu endpoint original
-    const res = await api.get("/Ingreso");
-    // asume { data: { data: [...] } }
-    setIncTypes(res.data?.data || []);
-  };
+  useEffect(() => {
+    (async () => {
+      try { const res = await api.get("/Ingreso"); setIncTypes(res.data?.data || []); }
+      catch { setIncTypes([]); }
+    })();
+  }, []);
 
-  useEffect(() => { loadTiposIngreso(); }, []);
+  // ✅ Reset duro al entrar en "crear"; prefill cuando es "editar"
+  useEffect(() => {
+    if (!isEdit) {
+      setIncome(EMPTY_INCOME);
+      return;
+    }
+    const r = record || {};
+    setIncome({
+      Id: state.id || r.id || "",
+      Foto: r.foto ?? "",
+      Fecha: r.fecha ? soloFecha(r.fecha) : "",
+      Mes: r.mes ?? "",
+      Importe: r.importe ?? "",
+      IngresoId: r.tipoId ?? "",
+      NombreIngreso: r.tipo ?? "",
+      Descripcion: r.descripcion ?? "",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit]);
 
-  const RegistrarIngreso = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     if (submitting) return;
+
     try {
-      // Validaciones mínimas
-      if (!income.IngresoId && !income.NombreIngreso) {
-        alert("Selecciona un tipo de ingreso.");
-        return;
-      }
-      if (!income.Mes) { alert("Selecciona el mes."); return; }
-      if (!income.Importe) { alert("Indica el importe."); return; }
+      if (!income.IngresoId) return alert("Selecciona un tipo de ingreso.");
+      if (!income.Mes) return alert("Selecciona el mes.");
+      if (!income.Importe) return alert("Indica el importe.");
 
       setSubmitting(true);
 
-      // ---- Construye el payload según tu API ----
-      // Variante A: si TU API espera ID del tipo de ingreso:
-      const payloadConId = {
+      if (isEdit) {
+        const id = state.id || record?.id;
+        await api.put(`/Ingreso/detalle/${id}`, {
+          fecha: income.Fecha || null,
+          mes: income.Mes || null,
+          nombreIngreso: income.IngresoId ? Number(income.IngresoId) : null,
+          descripcion: income.Descripcion ?? null,
+          importe: Number(income.Importe ?? 0),
+          foto: income.Foto ?? null,
+        });
+        alert("Ingreso actualizado");
+        navigate("/ingresos-detalle", { replace: true });
+        return;
+      }
+
+      // Crear
+      await api.post("/FichaIngreso/Create", {
         Foto: income.Foto || null,
         Fecha: income.Fecha || null,
         Mes: income.Mes,
         Importe: Number(income.Importe),
-        IngresoId: Number(income.IngresoId),       // <-- clave con ID
-        // NombreIngreso opcional si tu API lo ignora
-        NombreIngreso: income.NombreIngreso || null,
-
-      };
-
-      // Variante B: si TU API espera el nombre (como venías enviando):
-      const payloadConNombre = {
-        Foto: income.Foto || null,
-        Fecha: income.Fecha || null,
-        Mes: income.Mes,
-        Importe: Number(income.Importe),
-        NombreIngreso: Number(income.IngresoId),
-        Descripcion: income.Descripcion || null
-      };
-
-      // —— Elige UNA de las dos variantes:
-      const payload = payloadConNombre; // <- usa esta si tu backend espera NombreIngreso
-      // const payload = payloadConId;  // <- usa esta si tu backend espera un Id
-
-      // Tu endpoint original:
-      await api.post("/FichaIngreso/Create", payload);
-
-      alert("Registro exitoso");
-      navigate("/");
-
-      // (opcional) limpiar el estado
-      setIncome({
-        Id: "",
-        Foto: "",
-        Fecha: "",
-        Mes: "",
-        Importe: "",
-        NombreIngreso: "",
-        IngresoId: "",
-        Descripcion: ""
+        NombreIngreso: Number(income.IngresoId), // FK esperado por tu API
+        Descripcion: income.Descripcion || null,
       });
+      alert("Registro exitoso");
+      navigate("/", { replace: true });
+      setIncome(EMPTY_INCOME);
     } catch (err) {
       console.error(err);
-      alert("No se pudo registrar el ingreso. Revisa la consola para más detalle.");
+      alert((isEdit ? "No se pudo actualizar: " : "No se pudo registrar: ") + (err?.response?.data?.message || err?.message || "Error"));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <form className="containerPrincipal" onSubmit={RegistrarIngreso}>
-      <Link to="/" className="btn btn-secondary mb-3">Volver</Link>
+    <>
+      <div className="flex items-center justify-between gap-3 mt-2 mb-6 md:mb-8">
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-semibold text-slate-900">
+            {isEdit ? "Editar ingreso" : "Registro de ingreso"}
+          </h2>
+          {isEdit && (state.id || record?.id) && (
+            <span className="text-xs rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 px-2 py-1">
+              ID #{state.id || record?.id}
+            </span>
+          )}
+        </div>
+        <Link to="/" className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-slate-700 text-white hover:bg-slate-800 transition">
+          <ArrowLeft size={18} /> Volver
+        </Link>
+      </div>
 
-      <div className="card shadow-sm">
-        <div className="card-body">
-          <h2 className="h4">Registro de Ingreso</h2>
+      <form className="rounded-2xl bg-white/80 backdrop-blur shadow-sm ring-1 ring-slate-200 p-4 md:p-5 space-y-4" onSubmit={onSubmit}>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="TipoIngreso">Tipo de ingreso</label>
+          <select id="TipoIngreso" className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            onChange={handleTipoIngresoChange} value={income.IngresoId || ""}>
+            <option value="">Selecciona…</option>
+            {incTypes.map(t => <option key={t.id} value={t.id}>{t.nombreIngreso}</option>)}
+          </select>
+        </div>
 
-          <div className="form-group mb-3">
-            <label>Tipo de ingreso</label>
-            <select
-              className="form-control"
-              onChange={handleTipoIngresoChange}
-              value={income.IngresoId || ""}
-            >
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="Foto">Foto (opcional)</label>
+          <input id="Foto" type="file" className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+            accept="image/*" onChange={(e)=>convertirImagen(e.target.files)} />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="Fecha">Fecha</label>
+            <input id="Fecha" type="date" className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+              name="Fecha" value={income.Fecha || ""} onChange={handleChange} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="Mes">Mes</label>
+            <select id="Mes" className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+              name="Mes" value={income.Mes || ""} onChange={handleChange}>
               <option value="">Selecciona…</option>
-              {incTypes.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.nombreIngreso}
-                </option>
-              ))}
+              {months.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
-            {/* Valor visible (opcional para debug) */}
-            {/* <small className="text-muted">Nombre: {income.NombreIngreso || "-"}</small> */}
           </div>
 
-          <div className="form-group mb-3">
-            <label>Foto (opcional)</label>
-            <input
-              type="file"
-              className="form-control"
-              accept="image/*"
-              onChange={(e)=>convertirImagen(e.target.files)}
-            />
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="Descripcion">Descripción</label>
+            <input id="Descripcion" type="text" className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+              name="Descripcion" value={income.Descripcion || ""} onChange={handleChange} placeholder="(opcional)" />
           </div>
 
-          <div className="row">
-            <div className="col-md-4 mb-3">
-              <label>Fecha</label>
-              <input
-                type="date"
-                className="form-control"
-                name="Fecha"
-                value={income.Fecha || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="col-md-4 mb-3">
-              <label>Mes</label>
-              <select
-                className="form-control"
-                name="Mes"
-                value={income.Mes || ""}
-                onChange={handleChange}
-              >
-                <option value="">Selecciona…</option>
-                {months.map((m) => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-            <div className="col-md-4 mb-3">
-              <label>Descripción</label>
-              <input
-                type="text"
-                className="form-control"
-                name="Descripcion"
-                value={income.Descripcion || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="col-md-4 mb-3">
-              <label>Importe</label>
-              <input
-                type="number"
-                step="0.01"
-                className="form-control"
-                name="Importe"
-                value={income.Importe || ""}
-                onChange={handleChange}
-                placeholder="0,00"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="Importe">Importe</label>
+            <input id="Importe" type="number" step="0.01" className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+              name="Importe" value={income.Importe || ""} onChange={handleChange} placeholder="0,00" />
           </div>
+        </div>
 
-          <button className="btn btn-success" disabled={submitting}>
-            {submitting ? "Enviando…" : "Registrar ingreso"}
+        <div className="flex items-center gap-3">
+          <button className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 transition disabled:opacity-60" type="submit" disabled={submitting}>
+            {submitting ? (isEdit ? "Actualizando..." : "Guardando...") : (isEdit ? "Actualizar ingreso" : "Registrar ingreso")}
+          </button>
+          <button type="button" className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 bg-white text-slate-700 hover:bg-slate-50 ring-1 ring-slate-200 transition" onClick={()=>navigate(-1)}>
+            Cancelar
           </button>
         </div>
-      </div>
-    </form>
+      </form>
+    </>
   );
-};
-
-export default RegisterIncome;
+}

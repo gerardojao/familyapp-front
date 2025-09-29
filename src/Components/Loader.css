@@ -1,38 +1,39 @@
-.lds-ring {
-  display: flex;
-  position: relative;
-  width: 160px;
-  height: 160px;
-  margin: auto;
-  justify-content: center;;
+/* Contenedor del loader (no pisa Tailwind) */
+.fa-loader-wrap {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  padding: 2rem 0;
+}
+
+/* Texto */
+.fa-loader-text {
+  color: #475569;            /* slate-600 */
+  font-size: 0.95rem;
+}
+
+/* Aro giratorio de 2 capas */
+.lds-ring {
+  position: relative;
+  width: 48px;
+  height: 48px;
 }
 .lds-ring div {
   box-sizing: border-box;
-  display: block;
   position: absolute;
-  width: 128px;
-  height: 128px;
-  margin: 32px;
-  border: 8px solid #111;
+  inset: 0;
+  border: 4px solid #e2e8f0; /* slate-200 */
+  border-top-color: #0ea5e9; /* sky-500 */
   border-radius: 50%;
-  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  border-color: #111 transparent ;
+  animation: lds-ring-spin 1s linear infinite;
 }
-.lds-ring div:nth-child(1) {
-  animation-delay: -0.45s;
-}
+/* Segunda capa, con desfase y color distinto */
 .lds-ring div:nth-child(2) {
-  animation-delay: -0.3s;
+  border-top-color: #10b981; /* emerald-500 */
+  animation-delay: -0.5s;
 }
-.lds-ring div:nth-child(3) {
-  animation-delay: -0.15s;
-}
-@keyframes lds-ring {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+
+@keyframes lds-ring-spin {
+  to { transform: rotate(360deg); }
 }

@@ -1,18 +1,39 @@
 // src/Components/DateRange.jsx
 export default function DateRange({ from, to, onChangeFrom, onChangeTo, onClear, onSubmit }) {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit?.();
+  };
+
   return (
-    <form className="row gy-2 gx-3 align-items-end" onSubmit={(e)=>{e.preventDefault(); onSubmit?.();}}>
-      <div className="col-12 col-sm-4">
-        <label className="form-label">Desde</label>
-        <input type="date" className="form-control" value={from} onChange={(e)=>onChangeFrom(e.target.value)} />
-      </div>
-      <div className="col-12 col-sm-4">
-        <label className="form-label">Hasta</label>
-        <input type="date" className="form-control" value={to} onChange={(e)=>onChangeTo(e.target.value)} />
-      </div>
-      <div className="col-12 col-sm-4 d-flex gap-2">
-        <button type="submit" className="btn btn-primary flex-grow-1">Buscar</button>
-        <button type="button" className="btn btn-outline-secondary" onClick={onClear}>Limpiar</button>
+    <form onSubmit={handleSubmit}>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div>
+          <label htmlFor="dr-from" className="label">Desde</label>
+          <input
+            id="dr-from"
+            type="date"
+            className="input"
+            value={from}
+            onChange={(e) => onChangeFrom?.(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="dr-to" className="label">Hasta</label>
+          <input
+            id="dr-to"
+            type="date"
+            className="input"
+            value={to}
+            onChange={(e) => onChangeTo?.(e.target.value)}
+          />
+        </div>
+
+        <div className="flex gap-2 md:col-span-2">
+          <button type="submit" className="btn-emerald flex-1 md:flex-none">Buscar</button>
+          <button type="button" className="btn-ghost flex-1 md:flex-none" onClick={onClear}>Limpiar</button>
+        </div>
       </div>
     </form>
   );
