@@ -1,7 +1,7 @@
 // src/Components/Layout.jsx
 import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut, LogIn } from "lucide-react";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { Menu, X, LogOut, LogIn, UserPlus } from "lucide-react";
 import { useAuth } from "./AuthContext";
 
 const primaryBtn   = "inline-flex items-center rounded-xl px-4 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-sm";
@@ -11,7 +11,11 @@ const linkBtn      = "inline-flex items-center rounded-lg px-3 py-2 text-sm font
 export default function Layout({ children }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthed, user, logout } = useAuth();
+
+  // Rutas de autenticación: /login y /register
+  const isAuthRoute = /^\/(login|register)(\/|$)?/.test(location.pathname);
 
   const onLogout = () => {
     logout();
@@ -23,73 +27,85 @@ export default function Layout({ children }) {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-sky-50 to-white">
       {/* Topbar */}
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between">
-          {/* Logo */}
+        <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center">
+          {/* Logo (izquierda) */}
           <Link to="/" className="font-extrabold tracking-tight text-slate-900 text-lg sm:text-xl">
             <span className="bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent">Family</span>App
           </Link>
 
-          {/* Botón hamburguesa (ahora SIEMPRE visible) */}
-          <button
-            className="inline-flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-            aria-label="Abrir menú"
-            onClick={() => setOpen(v => !v)}
-          >
-            {open ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          {/* Navegación + burger SOLO fuera de /login y /register */}
+          {!isAuthRoute && (
+            <div className="ml-auto flex items-center gap-2">
+              <nav className="hidden md:flex items-center gap-2">
+                {isAuthed ? (
+                  <>
+                    <span className="text-sm text-slate-700">{user?.email}</span>
+                    <button
+                      onClick={onLogout}
+                      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100"
+                    >
+                      <LogOut size={16} /> Salir
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <NavLink
+                      to="/login"
+                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-slate-800 text-white hover:bg-slate-900"
+                    >
+                      <LogIn size={16} /> Iniciar sesión
+                    </NavLink>
+                    <NavLink
+                      to="/register"
+                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700"
+                    >
+                      <UserPlus size={16} /> Crear cuenta
+                    </NavLink>
+                  </div>
+                )}
+              </nav>
 
-          {/* Navegación (desktop) */}
-          <nav className="hidden md:flex items-center gap-2">
-            {isAuthed ? (
-              <>
-                <NavLink to="/register-income" className={primaryBtn}>Nuevo ingreso</NavLink>
-                <NavLink to="/register-expense" className={secondaryBtn}>Nuevo egreso</NavLink>
-                <NavLink to="/statement" className={linkBtn}>Statement</NavLink>
-
-                <span className="mx-2 text-sm text-slate-300">|</span>
-                <span className="text-sm text-slate-700">{user?.email}</span>
-                <button
-                  onClick={onLogout}
-                  className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100"
-                >
-                  <LogOut size={16}/> Salir
-                </button>
-              </>
-            ) : (
-              <NavLink
-                to="/login"
-                className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-slate-800 text-white hover:bg-slate-900"
+              {/* Botón hamburguesa (derecha) */}
+              <button
+                className="inline-flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                aria-label="Abrir menú"
+                onClick={() => setOpen(v => !v)}
               >
-                <LogIn size={16}/> Iniciar sesión
-              </NavLink>
-            )}
-          </nav>
+                {open ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Panel móvil/colapsable (también disponible en desktop si abres el burger) */}
-        {open && (
+        {/* Panel móvil/colapsable (solo fuera de rutas de auth) */}
+        {!isAuthRoute && open && (
           <div className="border-t border-slate-200 bg-white">
             <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-2">
               <div className="flex flex-col">
                 {isAuthed ? (
                   <>
-                    <NavLink to="/register-income" className="px-3 py-2 rounded-lg hover:bg-emerald-50" onClick={()=>setOpen(false)}>
+                    <NavLink to="/register-income" className="px-3 py-2 rounded-lg hover:bg-emerald-50" onClick={() => setOpen(false)}>
                       Nuevo ingreso
                     </NavLink>
-                    <NavLink to="/register-expense" className="px-3 py-2 rounded-lg hover:bg-sky-50" onClick={()=>setOpen(false)}>
+                    <NavLink to="/register-expense" className="px-3 py-2 rounded-lg hover:bg-sky-50" onClick={() => setOpen(false)}>
                       Nuevo egreso
                     </NavLink>
-                    <NavLink to="/statement" className="px-3 py-2 rounded-lg hover:bg-slate-100" onClick={()=>setOpen(false)}>
+                    <NavLink to="/statement" className="px-3 py-2 rounded-lg hover:bg-slate-100" onClick={() => setOpen(false)}>
                       Statement
                     </NavLink>
                     <button onClick={onLogout} className="mt-1 px-3 py-2 rounded-lg hover:bg-rose-50 text-rose-700 text-left">
-                      <span className="inline-flex items-center gap-2"><LogOut size={16}/> Salir</span>
+                      <span className="inline-flex items-center gap-2"><LogOut size={16} /> Salir</span>
                     </button>
                   </>
                 ) : (
-                  <NavLink to="/login" className="px-3 py-2 rounded-lg hover:bg-slate-100" onClick={()=>setOpen(false)}>
-                    <span className="inline-flex items-center gap-2"><LogIn size={16}/> Iniciar sesión</span>
-                  </NavLink>
+                  <>
+                    <NavLink to="/login" className="px-3 py-2 rounded-lg hover:bg-slate-100" onClick={() => setOpen(false)}>
+                      <span className="inline-flex items-center gap-2"><LogIn size={16} /> Iniciar sesión</span>
+                    </NavLink>
+                    <NavLink to="/register" className="px-3 py-2 rounded-lg hover:bg-emerald-50" onClick={() => setOpen(false)}>
+                      <span className="inline-flex items-center gap-2"><UserPlus size={16} /> Crear cuenta</span>
+                    </NavLink>
+                  </>
                 )}
               </div>
             </div>
@@ -97,36 +113,38 @@ export default function Layout({ children }) {
         )}
       </header>
 
-      {/* Hero (como lo tienes ahora) */}
-      <div className="relative mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 pb-4 md:pb-8">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 to-sky-50 p-6 md:p-10 ring-1 ring-slate-200 shadow-sm">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-emerald-200/30 blur-3xl" />
-          <div className="pointer-events-none absolute -left-12 -bottom-20 h-64 w-64 rounded-full bg-sky-200/30 blur-3xl" />
+      {/* Hero: NO mostrar en /login ni /register */}
+      {!isAuthRoute && (
+        <div className="relative mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 pb-4 md:pb-8">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 to-sky-50 p-6 md:p-10 ring-1 ring-slate-200 shadow-sm">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-emerald-200/30 blur-3xl" />
+            <div className="pointer-events-none absolute -left-12 -bottom-20 h-64 w-64 rounded-full bg-sky-200/30 blur-3xl" />
 
-          <div className="relative">
-            <h1 className="mt-1 text-center text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
-              <span className="bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent">Family</span>App
-            </h1>
-            <p className="mt-2 text-center text-slate-600 text-base md:text-lg">
-              Controla tus ingresos y egresos con un panel moderno.
-            </p>
+            <div className="relative">
+              <h1 className="mt-1 text-center text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
+                <span className="bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent">Family</span>App
+              </h1>
+              <p className="mt-2 text-center text-slate-600 text-base md:text-lg">
+                Controla tus ingresos y egresos con un panel moderno.
+              </p>
 
-            <div className="mt-5 hidden md:flex flex-wrap items-center justify-center gap-3">
-              {isAuthed ? (
-                <>
-                  <Link to="/register-income" className={primaryBtn}>Nuevo ingreso</Link>
-                  <Link to="/register-expense" className={secondaryBtn}>Nuevo egreso</Link>
-                  <Link to="/statement" className={linkBtn}>Ver statement</Link>
-                </>
-              ) : (
-                <Link to="/login" className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-slate-800 text-white hover:bg-slate-900">
-                  <LogIn size={16}/> Iniciar sesión
-                </Link>
-              )}
+              <div className="mt-5 hidden md:flex flex-wrap items-center justify-center gap-3">
+                {isAuthed ? (
+                  <>
+                    <Link to="/register-income" className={primaryBtn}>Nuevo ingreso</Link>
+                    <Link to="/register-expense" className={secondaryBtn}>Nuevo egreso</Link>
+                    <Link to="/statement" className={linkBtn}>Ver statement</Link>
+                  </>
+                ) : (
+                  <Link to="/login" className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-slate-800 text-white hover:bg-slate-900">
+                    <LogIn size={16} /> Iniciar sesión
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main */}
       <main className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 pb-12 space-y-6 flex-1">

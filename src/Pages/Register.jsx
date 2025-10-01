@@ -69,7 +69,7 @@ export default function Register({ expense, setExpense }) {
 
       if (isEdit) {
         const id = state.id || record?.id;
-        await api.put(`/Egreso/detalle/${id}`, {
+        await api.put(`/FichaEgreso/detalle/${id}`, {
           fecha: expense.Fecha || null,
           mes: expense.Mes || null,
           nombreEgreso: expense.NombreEgreso ? Number(expense.NombreEgreso) : null,
@@ -129,11 +129,11 @@ export default function Register({ expense, setExpense }) {
           </select>
         </div>
 
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="Foto">Foto (opcional)</label>
           <input id="Foto" type="file" className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
             accept="image/*" onChange={(e)=>convertirImagen(e.target.files)} />
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { currency } from "../utils/currency";
 import { loadStatementSummary } from "../utils/statementStore";
 import api from "../Components/api";
+import KPIs from "../Components/Kpi";
 
 function soloFecha(value) {
   if (!value) return "";
@@ -90,34 +91,8 @@ useEffect(() => {
   return (
     <>
       {/* KPIs superiores */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-5">
-          <div className="text-sm text-slate-500">Total ingresos</div>
-          <div className="mt-1 text-2xl font-semibold text-emerald-700">
-            {currency(totalIngresos)}
-          </div>
-        </div>
-        <div className="rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-white p-5">
-          <div className="text-sm text-slate-500">Total gastos</div>
-          <div className="mt-1 text-2xl font-semibold text-rose-700">
-            {currency(totalEgresos)}
-          </div>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5">
-          <div className="text-sm text-slate-500 ">
-            Balance
-            {lastStatement?.from && lastStatement?.to && (
-              <span className="text-xs text-slate-500">
-                ({lastStatement.from} → {lastStatement.to})
-              </span>
-            )}
-          </div>
-          <div className={`mt-1 text-2xl font-semibold ${balColor}`}>
-            {currency(balance)}
-          </div>
-        </div>
-      </section>
 
+      <KPIs  /* refreshKey={refreshKey} */ />
       {/* Acciones */}
       <section className="text-center">
         <h3 className="text-2xl font-semibold text-slate-900">Acciones</h3>

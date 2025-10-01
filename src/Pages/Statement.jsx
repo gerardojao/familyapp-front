@@ -6,6 +6,7 @@ import Loader from "../Components/Loader";
 import { currency } from "../utils/currency";
 import { ArrowLeft } from "lucide-react";
 import { saveStatementSummary } from "../utils/statementStore";
+import KPIs from "../Components/Kpi";
 
 export default function Statement() {
   const [incomes, setIncomes] = useState([]);   // [{ cuenta_Ingreso/ Cuenta_Ingreso, total/Total }, ...]
@@ -75,24 +76,7 @@ export default function Statement() {
       </div>
 
       {/* KPIs */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="card p-4">
-          <div className="kpi-label">Total ingresos</div>
-          <div className="kpi-value text-emerald-700">{currency(totalIncomes)}</div>
-        </div>
-
-        <div className="card p-4">
-          <div className="kpi-label">Total gastos</div>
-          <div className="kpi-value text-rose-700">{currency(totalExpenses)}</div>
-        </div>
-
-        <div className="card p-4">
-          <div className="kpi-label">{balance >= 0 ? "Ganancia" : "Pérdida"}</div>
-          <div className={`kpi-value ${balance >= 0 ? "text-emerald-700" : "text-amber-700"}`}>
-            {currency(balance)}
-          </div>
-        </div>
-      </section>
+      <KPIs  /* refreshKey={refreshKey} */ />
 
       {/* Tablas Ingresos / Gastos */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -106,7 +106,7 @@ export default function ExpenseDetails() {
   const onDelete = async (row) => {
     if (!confirm("¿Eliminar este gasto?")) return;
     try {
-      await api.delete(`/Egreso/detalle/${row.id}`);
+      await api.delete(`/FichaEgreso/detalle/${row.id}`);
       setRows((prev) => prev.filter((x) => x.id !== row.id));
     } catch {
       alert("No se pudo eliminar.");

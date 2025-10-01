@@ -2,8 +2,8 @@
 import axios from "axios";
 
 const api = axios.create({
-//   baseURL: import.meta.env.VITE_API_BASE ?? "/api",
-baseURL: " https://localhost:7288/api" 
+  baseURL: import.meta.env.VITE_API_BASE ?? "https://localhost:7288/api",
+  // withCredentials: false, // si no usas cookies
 });
 
 api.interceptors.request.use((config) => {
@@ -17,7 +17,6 @@ api.interceptors.response.use(
   (err) => {
     const status = err?.response?.status;
     if (status === 401) {
-      // Notificar y limpiar
       localStorage.removeItem("fa_token");
       localStorage.removeItem("fa_user");
       window.dispatchEvent(new Event("fa:unauthorized"));
@@ -27,3 +26,5 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+

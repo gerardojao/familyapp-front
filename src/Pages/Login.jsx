@@ -1,17 +1,20 @@
 // src/Pages/Login.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../Components/AuthContext";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 
 export default function Login() {
   const nav = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthed } = useAuth();  
   const [email, setEmail] = useState("");
   const [pwd, setPwd]     = useState("");
   const [show, setShow]   = useState(false);
   const [busy, setBusy]   = useState(false);
   const [err, setErr]     = useState("");
+
+
+  useEffect(() => { if (isAuthed) nav("/"); }, [isAuthed, nav]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -22,8 +25,11 @@ export default function Login() {
       await login(email.trim(), pwd);
       nav("/"); // éxito
     } catch (ex) {
-      const msg = ex?.response?.data?.message || ex?.message || "Error al iniciar sesión";
-      setErr(msg);
+      const msg = ex?.response?.data?.message
+        ?? ex?.response?.data?.Message
+        ?? ex?.message
+        ?? "Error al iniciar sesión";
+        setErr(msg);
     } finally {
       setBusy(false);
     }

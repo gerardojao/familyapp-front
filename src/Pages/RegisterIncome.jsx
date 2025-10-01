@@ -4,12 +4,31 @@ import { ArrowLeft } from "lucide-react";
 import api from "../Components/api";
 import { soloFecha } from "../utils/date";
 
+
 const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
 const EMPTY_INCOME = {
   Id: "", Foto: "", Fecha: "", Mes: "", Importe: "",
   NombreIngreso: "", IngresoId: "", Descripcion: "",
 };
+
+// const onFileChange = async (fileList) => {
+//   const file = fileList?.[0];
+//   if (!file) return;
+//   try {
+//     const up = await uploadImage(file);
+//     if (up?.ok) {
+//       // Guarda SOLO el filename en DB
+//       setField("Foto", up.filename);
+//       // Opcional: también puedes guardar up.url para preview local
+//     } else {
+//       alert("No se pudo subir la imagen.");
+//     }
+//   } catch (e) {
+//     console.error(e);
+//     alert("Error subiendo la imagen.");
+//   }
+// };
 
 export default function RegisterIncome({ income, setIncome }) {
   const navigate = useNavigate();
@@ -140,11 +159,11 @@ export default function RegisterIncome({ income, setIncome }) {
           </select>
         </div>
 
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="Foto">Foto (opcional)</label>
           <input id="Foto" type="file" className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
-            accept="image/*" onChange={(e)=>convertirImagen(e.target.files)} />
-        </div>
+            accept="image/*" onChange={(e)=>onFileChange(e.target.files)} />
+        </div> */}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
