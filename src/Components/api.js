@@ -1,10 +1,13 @@
 // src/Components/api.js
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE ?? "https://localhost:7288/api",
-  // withCredentials: false, // si no usas cookies
-});
+const baseURL =
+  import.meta.env.VITE_API_BASE ||
+  (import.meta.env.DEV
+    ? "https://localhost:7288/api"            // dev
+    : "http://familyapp-api.somee.com/api");   // prod (fallback)
+
+const api = axios.create({ baseURL });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("fa_token");
@@ -26,5 +29,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
-

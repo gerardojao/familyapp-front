@@ -16,6 +16,8 @@ import Login from "./Pages/Login.jsx";
 import NewUser from "./Pages/NewUser.jsx";
 import AuthProvider from "./Components/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import ForgotPassword from "./Pages/ForgotPassword";
+import ResetPassword from "./Pages/ResetPassword";
 import "./App.css";
 
 function App() {
@@ -34,6 +36,8 @@ function App() {
             {/* públicas */}
             <Route path="/register" element={<NewUser />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<Home />} />
 
             {/* protegidas (ajusta según tu necesidad) */}
