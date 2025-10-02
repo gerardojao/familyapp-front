@@ -1,13 +1,17 @@
 // src/Components/api.js
 import axios from "axios";
 
+const isDev = import.meta.env.DEV;
+
+// En dev usa tu API local; en prod SIEMPRE usa el proxy /api de Vercel
 const baseURL =
-  import.meta.env.VITE_API_BASE ||
-  (import.meta.env.DEV
-    ? "https://localhost:7288/api"            // dev
-    : "http://familyapp-api.somee.com/api");   // prod (fallback)
+  import.meta.env.VITE_API_BASE ??
+  (isDev ? "https://localhost:7288/api" : "/api");
 
 const api = axios.create({ baseURL });
+
+// (opcional para verificar en prod)
+if (!isDev) console.log("[API baseURL]", baseURL);
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("fa_token");
