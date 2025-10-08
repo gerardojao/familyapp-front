@@ -19,6 +19,9 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import ForgotPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
 import "./App.css";
+import Privacy from "./Pages/Privacy";
+import Terms from "./Pages/Terms";
+import Support from "./Pages/Support";
 
 function App() {
   const [income, setIncome] = useState({
@@ -39,6 +42,9 @@ function App() {
             <Route path="/forgot" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<Home />} />
+             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/support" element={<Support />} />
 
             {/* protegidas (ajusta según tu necesidad) */}
             <Route
@@ -114,6 +120,7 @@ function App() {
               }
             />
           </Routes>
+         
         </Layout>
       </AuthProvider>
     </BrowserRouter>

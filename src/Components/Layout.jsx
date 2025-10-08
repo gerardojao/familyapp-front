@@ -124,8 +124,8 @@ export default function Layout({ children }) {
               <h1 className="mt-1 text-center text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
                 <span className="bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent">Family</span>App
               </h1>
-              <p className="mt-2 text-center text-slate-600 text-base md:text-lg">
-                Visualiza, analiza y domina tus finanzas.
+              <p className="mt-2 text-center text-slate-600 text-base md:text-lg font-semibold">
+                <strong>Visualiza, analiza y domina tus finanzas.</strong>
               </p>
 
               <div className="mt-5 hidden md:flex flex-wrap items-center justify-center gap-3">
@@ -167,11 +167,11 @@ export default function Layout({ children }) {
             </div>
             <nav className="order-1 md:order-2 w-full md:w-auto">
               <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 md:gap-4">
-                <li><a href="#" className="rounded-lg px-2 py-1.5 hover:text-slate-700 hover:bg-slate-100">Privacidad</a></li>
+                <li><a href="/privacy" className="rounded-lg px-2 py-1.5 hover:text-slate-700 hover:bg-slate-100">Privacidad</a></li>
                 <li className="hidden md:block text-slate-300">•</li>
-                <li><a href="#" className="rounded-lg px-2 py-1.5 hover:text-slate-700 hover:bg-slate-100">Términos</a></li>
+                <li><a href="/terms" className="rounded-lg px-2 py-1.5 hover:text-slate-700 hover:bg-slate-100">Términos</a></li>
                 <li className="hidden md:block text-slate-300">•</li>
-                <li><a href="#" className="rounded-lg px-2 py-1.5 hover:text-slate-700 hover:bg-slate-100">Soporte</a></li>
+                <li><a href="/support" className="rounded-lg px-2 py-1.5 hover:text-slate-700 hover:bg-slate-100">Soporte</a></li>
               </ul>
             </nav>
           </div>
