@@ -6,7 +6,7 @@ import { useAuth } from "./AuthContext";
 
 const primaryBtn   = "inline-flex items-center rounded-xl px-4 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-sm";
 const secondaryBtn = "inline-flex items-center rounded-xl px-4 py-2.5 bg-sky-600 text-white hover:bg-sky-700 transition shadow-sm";
-const linkBtn      = "inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100 hover:text-slate-900 transition";
+const linkBtn      = "inline-flex items-center rounded-xl px-4 py-2.5 bg-slate-600 text-white hover:bg-slate-700 transition shadow-sm";
 
 export default function Layout({ children }) {
   const [open, setOpen] = useState(false);
@@ -91,7 +91,7 @@ export default function Layout({ children }) {
                       Nuevo egreso
                     </NavLink>
                     <NavLink to="/statement" className="px-3 py-2 rounded-lg hover:bg-slate-100" onClick={() => setOpen(false)}>
-                      Statement
+                      Ver Balance
                     </NavLink>
                     <button onClick={onLogout} className="mt-1 px-3 py-2 rounded-lg hover:bg-rose-50 text-rose-700 text-left">
                       <span className="inline-flex items-center gap-2"><LogOut size={16} /> Salir</span>
@@ -125,7 +125,7 @@ export default function Layout({ children }) {
                 <span className="bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent">Family</span>App
               </h1>
               <p className="mt-2 text-center text-slate-600 text-base md:text-lg">
-                Controla tus ingresos y egresos con un panel moderno.
+                Visualiza, analiza y domina tus finanzas.
               </p>
 
               <div className="mt-5 hidden md:flex flex-wrap items-center justify-center gap-3">
@@ -133,7 +133,7 @@ export default function Layout({ children }) {
                   <>
                     <Link to="/register-income" className={primaryBtn}>Nuevo ingreso</Link>
                     <Link to="/register-expense" className={secondaryBtn}>Nuevo egreso</Link>
-                    <Link to="/statement" className={linkBtn}>Ver statement</Link>
+                    <Link to="/statement" className={linkBtn}>Ver Balance</Link>
                   </>
                 ) : (
                   <Link to="/login" className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-slate-800 text-white hover:bg-slate-900">
