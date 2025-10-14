@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import api from "../Components/api";
 import Loader from "../Components/Loader";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { soloFecha } from "../utils/date";
 import {
   Search, RotateCcw, ArrowLeft, CalendarDays, XCircle, Pencil, Trash2,
@@ -11,8 +11,79 @@ const eur = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" 
 const ymd = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
+/** Banner superior para éxito/error (igual que en Register/RegisterIncome) */
+const Banner = ({ type = "success", text, onClose, actionLabel, onAction }) => {
+  if (!text) return null;
+  const map = {
+    success: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    error: "bg-rose-50 text-rose-700 ring-rose-200",
+  };
+  return (
+    <div role="alert" aria-live="polite" className={`mb-4 rounded-xl p-3 text-sm ring-1 ${map[type]}`}>
+      <div className="flex items-start justify-between gap-3">
+        <span>{text}</span>
+        <div className="flex items-center gap-3">
+          {actionLabel && onAction && (
+            <button
+              type="button"
+              onClick={onAction}
+              className="rounded-lg px-2.5 py-1 text-xs ring-1 ring-current/20 hover:bg-white/60"
+            >
+              {actionLabel}
+            </button>
+          )}
+          <button type="button" onClick={onClose} className="text-xs underline underline-offset-2">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/** Modal de confirmación sencillo y accesible */
+const ConfirmModal = ({ open, title, message, confirmLabel = "Sí", cancelLabel = "No", loading = false, onConfirm, onCancel }) => {
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40" onClick={loading ? undefined : onCancel} />
+      {/* Dialog */}
+      <div className="relative z-10 w-[92%] max-w-md rounded-2xl bg-white p-5 shadow-xl ring-1 ring-slate-200">
+        <h3 id="confirm-title" className="text-lg font-semibold text-slate-900">{title}</h3>
+        <p className="mt-2 text-sm text-slate-600">{message}</p>
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            type="button"
+            className="rounded-xl px-4 py-2.5 bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 disabled:opacity-50"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            {cancelLabel}
+          </button>
+          <button
+            type="button"
+            className="rounded-xl px-4 py-2.5 bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50"
+            onClick={onConfirm}
+            disabled={loading}
+            autoFocus
+          >
+            {loading ? "Eliminando..." : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function IncomeDetails() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [rows, setRows] = useState([]);
   const [from, setFrom] = useState("");
@@ -20,6 +91,17 @@ export default function IncomeDetails() {
   const [tipoId, setTipoId] = useState("");
   const [tipos, setTipos] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Banner global
+  const [notice, setNotice] = useState(null); // { type, text, actionLabel?, onAction?, onClose?, autocloseMs? }
+  const autoTimerRef = useRef(null);
+
+  // Estado del modal de confirmación
+  const [confirmState, setConfirmState] = useState({
+    open: false,
+    row: null,
+    loading: false,
+  });
 
   const total = useMemo(() => rows.reduce((acc, x) => acc + Number(x.importe ?? 0), 0), [rows]);
 
@@ -29,6 +111,10 @@ export default function IncomeDetails() {
       setTipos(res.data?.data ?? []);
     } catch {
       setTipos([]);
+      setNotice({
+        type: "error",
+        text: "No se pudieron cargar los tipos de ingreso.",
+      });
     }
   }, []);
 
@@ -48,8 +134,12 @@ export default function IncomeDetails() {
         const res = await api.get(`/Ingreso/detalle?${params.toString()}`);
         const list = res.data?.data?.[0] ?? [];
         setRows(Array.isArray(list) ? list : []);
-      } catch {
+      } catch (e) {
         setRows([]);
+        setNotice({
+          type: "error",
+          text: "No se pudo obtener el detalle de ingresos.",
+        });
       } finally {
         setLoading(false);
       }
@@ -62,10 +152,45 @@ export default function IncomeDetails() {
     fetchData();
   }, [loadTipos, fetchData]);
 
+  // Soporte para "flash" al llegar desde otra pantalla
+  useEffect(() => {
+    const flash = location.state?.flash;
+    if (flash?.text) {
+      setNotice({
+        type: flash.type || "success",
+        text: flash.text,
+        autocloseMs: flash.autocloseMs ?? 2500,
+        onClose: () => setNotice(null),
+      });
+      navigate(location.pathname, { replace: true, state: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Autocierre de banners
+  useEffect(() => {
+    if (autoTimerRef.current) {
+      clearTimeout(autoTimerRef.current);
+      autoTimerRef.current = null;
+    }
+    if (notice?.autocloseMs && typeof notice?.onClose === "function") {
+      autoTimerRef.current = setTimeout(() => {
+        notice.onClose();
+      }, notice.autocloseMs);
+    }
+    return () => {
+      if (autoTimerRef.current) {
+        clearTimeout(autoTimerRef.current);
+        autoTimerRef.current = null;
+      }
+    };
+  }, [notice]);
+
   const onSubmit = (e) => {
     e.preventDefault();
     fetchData();
   };
+
   const onClear = () => {
     setFrom("");
     setTo("");
@@ -86,8 +211,7 @@ export default function IncomeDetails() {
     const now = new Date();
     const past = new Date();
     past.setDate(now.getDate() - 30);
-    const f = ymd(past),
-      t = ymd(now);
+    const f = ymd(past), t = ymd(now);
     setFrom(f);
     setTo(t);
     fetchData({ from: f, to: t });
@@ -102,21 +226,42 @@ export default function IncomeDetails() {
   };
 
   // Acciones
-  const onEdit = (row) => navigate("/register-income", { state: { edit: true, record: row } });
-  const onDelete = async (row) => {
-    if (!confirm("¿Eliminar este ingreso?")) return;
+  const onEdit = (row) =>
+    navigate("/register-income", { state: { edit: true, record: row } });
+
+  // Abrir modal de confirmación
+  const onDeleteClick = (row) => {
+    setConfirmState({ open: true, row, loading: false });
+  };
+
+  // Confirmar eliminación
+  const confirmDelete = async () => {
+    const row = confirmState.row;
+    if (!row) return;
     try {
+      setConfirmState((s) => ({ ...s, loading: true }));
       await api.delete(`/Ingreso/detalle/${row.id}`);
       setRows((prev) => prev.filter((x) => x.id !== row.id));
+      setConfirmState({ open: false, row: null, loading: false });
+      setNotice({
+        type: "success",
+        text: "Ingreso eliminado correctamente.",
+        autocloseMs: 2000,
+        onClose: () => setNotice(null),
+      });
     } catch {
-      alert("No se pudo eliminar.");
+      setConfirmState({ open: false, row: null, loading: false });
+      setNotice({
+        type: "error",
+        text: "No se pudo eliminar el ingreso.",
+      });
     }
   };
 
   return (
     <>
       {/* Header + volver */}
-      <div className="flex items-center justify-between gap-3 mt-2 mb-6 md:mb-8">
+      <div className="flex items-center justify-between gap-3 mt-2 mb-3 md:mb-4">
         <h2 className="text-2xl font-semibold text-slate-900">Detalle de ingresos</h2>
         <Link
           to="/"
@@ -125,6 +270,21 @@ export default function IncomeDetails() {
           <ArrowLeft size={18} /> Volver
         </Link>
       </div>
+
+      {/* Banner global */}
+      <Banner
+        type={notice?.type}
+        text={notice?.text}
+        onClose={() => {
+          if (typeof notice?.onClose === "function") {
+            notice.onClose();
+          } else {
+            setNotice(null);
+          }
+        }}
+        actionLabel={notice?.actionLabel}
+        onAction={notice?.onAction}
+      />
 
       {/* Filtros */}
       <form
@@ -175,21 +335,21 @@ export default function IncomeDetails() {
             </select>
           </div>
 
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 transition"
-            >
-              <Search size={18} /> {loading ? "Buscando..." : "Buscar"}
-            </button>
-            <button
-              type="button"
-              onClick={onClear}
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-white text-slate-700 hover:bg-slate-50 ring-1 ring-slate-200 transition"
-            >
-              <RotateCcw size={18} /> Limpiar
-            </button>
-          </div>
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 transition"
+          >
+            <Search size={18} /> {loading ? "Buscando..." : "Buscar"}
+          </button>
+          <button
+            type="button"
+            onClick={onClear}
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-white text-slate-700 hover:bg-slate-50 ring-1 ring-slate-200 transition"
+          >
+            <RotateCcw size={18} /> Limpiar
+          </button>
+        </div>
         </div>
 
         {/* Rangos rápidos */}
@@ -264,7 +424,7 @@ export default function IncomeDetails() {
                       <Pencil size={14} />
                     </button>
                     <button
-                      onClick={() => onDelete(r)}
+                      onClick={() => onDeleteClick(r)}
                       className="inline-flex items-center rounded-md px-2 py-1 bg-rose-600 text-white text-xs hover:bg-rose-700"
                     >
                       <Trash2 size={14} />
@@ -333,7 +493,7 @@ export default function IncomeDetails() {
                                 <Pencil size={16} /> Editar
                               </button>
                               <button
-                                onClick={() => onDelete(r)}
+                                onClick={() => onDeleteClick(r)}
                                 className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 bg-rose-600 text-white hover:bg-rose-700"
                               >
                                 <Trash2 size={16} /> Eliminar
@@ -358,6 +518,22 @@ export default function IncomeDetails() {
           </>
         )}
       </section>
+
+      {/* Modal de confirmación */}
+      <ConfirmModal
+        open={confirmState.open}
+        title="Confirmar eliminación"
+        message={
+          confirmState.row
+            ? `¿Estás seguro de eliminar el ingreso “${confirmState.row.descripcion ?? "Sin nombre"}”?`
+            : "¿Estás seguro de eliminar este ingreso?"
+        }
+        confirmLabel="Sí"
+        cancelLabel="No"
+        loading={confirmState.loading}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmState({ open: false, row: null, loading: false })}
+      />
     </>
   );
 }

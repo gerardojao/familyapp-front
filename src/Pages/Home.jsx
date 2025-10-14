@@ -43,6 +43,18 @@ export default function Home() {
   const [movimientos, setMovimientos] = useState([]);
   const [lastStatement, setLastStatement] = useState(null);
 
+  const ts = (d) => (d ? new Date(d).getTime() : 0);
+
+// ordenados DESC por fecha (y por id si hay empate)
+const movimientosSorted = useMemo(
+  () =>
+    [...movimientos].sort(
+      (a, b) =>
+        (ts(b.fecha) - ts(a.fecha)) || ((b.id ?? 0) - (a.id ?? 0))
+    ),
+  [movimientos]
+);
+
 useEffect(() => {
   (async () => {
     try {
@@ -196,7 +208,7 @@ useEffect(() => {
       <div className="px-3 py-4 text-slate-500">No hay movimientos aún.</div>
     )}
 
-    {movimientos.map((m) => (
+    {movimientosSorted.map((m) => (
       <div key={`${m.kind}-${m.id}`} className="px-3 py-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-medium text-slate-800">
@@ -247,7 +259,7 @@ useEffect(() => {
             </tr>
           )}
 
-          {movimientos.map((m) => (
+          {movimientosSorted.map((m) => (
             <tr key={`${m.kind}-${m.id}`} className="hover:bg-slate-50">
               <td className="py-2.5 px-3 font-medium text-slate-800 whitespace-nowrap">
                 {soloFecha(m.fecha)}
