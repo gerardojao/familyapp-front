@@ -18,6 +18,7 @@ import AuthProvider from "./Components/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import ForgotPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
+import TrialGate from "./Pages/TrialGate";
 import "./App.css";
 import Privacy from "./Pages/Privacy";
 import Terms from "./Pages/Terms";
@@ -37,6 +38,7 @@ function App() {
         <Layout>
           <Routes>
             {/* públicas */}
+            <Route path="/trial" element={<TrialGate />} />
             <Route path="/register" element={<NewUser />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot" element={<ForgotPassword />} />

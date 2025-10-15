@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, LogOut, LogIn, UserPlus } from "lucide-react";
 import { useAuth } from "./AuthContext";
+import TrialBanner from "./TrialBanner";
 
 const primaryBtn   = "inline-flex items-center rounded-xl px-4 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-sm";
 const secondaryBtn = "inline-flex items-center rounded-xl px-4 py-2.5 bg-sky-600 text-white hover:bg-sky-700 transition shadow-sm";
@@ -145,7 +146,7 @@ export default function Layout({ children }) {
           </div>
         </div>
       )}
-
+      <TrialBanner />
       {/* Main */}
       <main className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 pb-12 space-y-6 flex-1">
         {children}

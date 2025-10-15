@@ -1,59 +1,353 @@
+// // src/Components/AuthContext.jsx
+// import { createContext, useContext, useEffect, useMemo, useState } from "react";
+// import api from "./api";
+
+// const AuthCtx = createContext({
+//   user: null,
+//   token: null,
+//   isAuthed: false,
+//   isTrial: false,
+//   trialEndsAt: null,
+//   // stubs (se reemplazan en el provider real)
+//   login: async () => { throw new Error("AuthProvider no montado"); },
+//   logout: () => {},
+//   adoptToken: () => {},
+// });
+
+// export const useAuth = () => useContext(AuthCtx);
+
+// function decodeJwtExp(token) {
+//   try {
+//     const [, payload] = token.split(".");
+//     const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+//     return typeof json?.exp === "number" ? new Date(json.exp * 1000) : null;
+//   } catch {
+//     return null;
+//   }
+// }
+
+// export default function AuthProvider({ children }) {
+//   const [user, setUser] = useState(() => {
+//     try { return JSON.parse(localStorage.getItem("fa_user")) || null; } catch { return null; }
+//   });
+//   const [token, setToken] = useState(() => localStorage.getItem("fa_token") || null);
+//   const [trialEndsAt, setTrialEndsAt] = useState(() => {
+//     const raw = localStorage.getItem("fa_trial_exp");
+//     return raw ? new Date(raw) : null;
+//   });
+
+//   const isAuthed = !!token;
+
+//   // 🔑 SOLO es trial si:
+//   //  - el usuario tiene rol trial, o
+//   //  - aún no hay usuario (sesión temporal) y existe un fin de trial
+//   const roleLower = user?.role?.toLowerCase?.();
+//   const isTrial = (roleLower === "trial") || (!user && !!trialEndsAt);
+
+//   // Aplica/quita Authorization cuando cambie el token
+//   useEffect(() => {
+//     if (token) {
+//       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+//       if (!trialEndsAt) {
+//         const exp = decodeJwtExp(token);
+//         if (exp) {
+//           setTrialEndsAt(exp);
+//           localStorage.setItem("fa_trial_exp", exp.toISOString());
+//         }
+//       }
+//     } else {
+//       delete api.defaults.headers.common["Authorization"];
+//     }
+//   }, [token]); // eslint-disable-line
+
+//   // ⚠️ Si hay usuario y NO es trial → apaga cualquier rastro de prueba
+//   useEffect(() => {
+//     if (user && roleLower !== "trial") {
+//       setTrialEndsAt(null);
+//       localStorage.removeItem("fa_trial_exp");
+//     }
+//   }, [user, roleLower]);
+
+//   // Listener global para 401
+//   useEffect(() => {
+//     const onUnauthorized = () => {
+//       setToken(null);
+//       setUser(null);
+//       setTrialEndsAt(null);
+//       localStorage.removeItem("fa_trial_exp");
+//     };
+//     window.addEventListener("fa:unauthorized", onUnauthorized);
+//     return () => window.removeEventListener("fa:unauthorized", onUnauthorized);
+//   }, []);
+
+//   // Permite “inyectar” token (y user/exp) desde TrialGate
+//   const adoptToken = (tok, usr = null, trialExp = null) => {
+//     localStorage.setItem("fa_token", tok);
+//     setToken(tok);
+
+//     if (usr) {
+//       localStorage.setItem("fa_user", JSON.stringify(usr));
+//       setUser(usr);
+//     } else {
+//       setUser(null);
+//     }
+
+//     const expFromJwt = decodeJwtExp(tok);
+//     const finalExp = trialExp ? new Date(trialExp) : expFromJwt || null;
+
+//     if (finalExp) {
+//       setTrialEndsAt(finalExp);
+//       localStorage.setItem("fa_trial_exp", finalExp.toISOString());
+//     } else {
+//       setTrialEndsAt(null);
+//       localStorage.removeItem("fa_trial_exp");
+//     }
+//   };
+
+//   // Login normal => NO trial
+//   const login = async (email, password) => {
+//     const res = await api.post("/Auth/login", { email, password });
+
+//     const tok = res.data?.token ?? res.data?.Token;
+//     const usr = res.data?.user  ?? res.data?.User;
+//     if (!tok) throw new Error(res?.data?.message || "No se recibió token.");
+
+//     localStorage.setItem("fa_token", tok);
+//     if (usr) localStorage.setItem("fa_user", JSON.stringify(usr));
+//     setToken(tok);
+//     setUser(usr ?? null);
+
+//     if (!usr) {
+//       try {
+//         const who = await api.get("/Auth/whoami");
+//         const u = { id: Number(who.data?.sub), email: who.data?.email, role: who.data?.role ?? "user" };
+//         localStorage.setItem("fa_user", JSON.stringify(u));
+//         setUser(u);
+//       } catch { /* ignore */ }
+//     }
+
+//     // 🔕 apaga trial en login normal
+//     setTrialEndsAt(null);
+//     localStorage.removeItem("fa_trial_exp");
+
+//     return { token: tok, user: usr };
+//   };
+
+//   const logout = async () => {
+//     try { await api.post("/Auth/logout"); } catch { /* ignora */ }
+//     localStorage.removeItem("fa_token");
+//     localStorage.removeItem("fa_user");
+//     localStorage.removeItem("fa_trial_exp");
+//     setToken(null);
+//     setUser(null);
+//     setTrialEndsAt(null);
+//     delete api.defaults.headers.common["Authorization"];
+//   };
+
+//   const value = useMemo(
+//     () => ({ user, token, isAuthed, isTrial, trialEndsAt, login, logout, adoptToken }),
+//     [user, token, isAuthed, isTrial, trialEndsAt]
+//   );
+
+//   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
+// }
+
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import api from "./api";
 
-const AuthCtx = createContext(null);
+const AuthCtx = createContext({
+  user: null,
+  token: null,
+  isAuthed: false,
+  isTrial: false,
+  trialEndsAt: null,
+  login: async () => { throw new Error("AuthProvider no montado"); },
+  logout: () => {},
+  adoptToken: (_tok, _usr = null, _trialExp = null) => {
+    localStorage.setItem("fa_token", _tok);
+    setToken(_tok);
+
+    if (_usr) {
+      localStorage.setItem("fa_user", JSON.stringify(_usr));
+      setUser(_usr);
+    } else {
+      // sesión temporal sin user en localStorage
+      localStorage.removeItem("fa_user");
+      setUser(null);
+    }
+
+    const expFromJwt = decodeJwtExp(_tok);
+    const finalExp = _trialExp ? new Date(_trialExp) : expFromJwt || null;
+
+    if (finalExp) {
+      setTrialEndsAt(finalExp);
+      localStorage.setItem("fa_trial_exp", finalExp.toISOString());
+    } else {
+      setTrialEndsAt(null);
+      localStorage.removeItem("fa_trial_exp");
+    }
+  },
+});
+
 export const useAuth = () => useContext(AuthCtx);
+
+function decodeJwtExp(token) {
+  try {
+    const [, payload] = token.split(".");
+    const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    return typeof json?.exp === "number" ? new Date(json.exp * 1000) : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem("fa_user")) || null; } catch { return null; }
   });
   const [token, setToken] = useState(() => localStorage.getItem("fa_token") || null);
-  const isAuthed = !!token;
+  const [trialEndsAt, setTrialEndsAt] = useState(() => {
+    const raw = localStorage.getItem("fa_trial_exp");
+    return raw ? new Date(raw) : null;
+  });
 
+  const isAuthed = !!token;
+  const roleLower = user?.role?.toLowerCase?.();
+  // Consideramos trial cuando hay fecha de fin de trial.
+  const isTrial = !!trialEndsAt;
+
+  // Aplica/quita Authorization cuando cambie el token
   useEffect(() => {
-    const onUnauthorized = () => { setToken(null); setUser(null); };
+    if (token) {
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      if (!trialEndsAt) {
+        const exp = decodeJwtExp(token);
+        if (exp) {
+          setTrialEndsAt(exp);
+          localStorage.setItem("fa_trial_exp", exp.toISOString());
+        }
+      }
+    } else {
+      delete api.defaults.headers.common["Authorization"];
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  // Si hay usuario y NO es trial → apaga rastro de prueba
+  useEffect(() => {
+    if (user && roleLower !== "trial") {
+      setTrialEndsAt(null);
+      localStorage.removeItem("fa_trial_exp");
+    }
+  }, [user, roleLower]);
+
+  // Listener global para 401
+  useEffect(() => {
+    const onUnauthorized = () => {
+      setToken(null);
+      setUser(null);
+      setTrialEndsAt(null);
+      localStorage.removeItem("fa_trial_exp");
+    };
     window.addEventListener("fa:unauthorized", onUnauthorized);
     return () => window.removeEventListener("fa:unauthorized", onUnauthorized);
   }, []);
 
-  // src/Components/AuthContext.jsx (resumen del login)
-const login = async (email, password) => {
-  const res = await api.post("/Auth/login", { email, password });
+  // ✅ Listener para “adoptar” token vía evento global (plan B para HMR/timing)
+  useEffect(() => {
+    const onTokenSet = (e) => {
+      const { token: tok, user: usr, trialExp } = e.detail || {};
+      if (!tok) return;
+      adoptToken(tok, usr ?? null, trialExp ?? null);
+    };
+    const onTokenClear = () => {
+      localStorage.removeItem("fa_token");
+      localStorage.removeItem("fa_user");
+      localStorage.removeItem("fa_trial_exp");
+      setToken(null);
+      setUser(null);
+      setTrialEndsAt(null);
+      delete api.defaults.headers.common["Authorization"];
+    };
 
-  // soporta distintas keys (token/Token, user/User, ok/Ok)
-  const tok = res.data?.token ?? res.data?.Token;
-  const usr = res.data?.user  ?? res.data?.User;
+    window.addEventListener("fa:token:set", onTokenSet);
+    window.addEventListener("fa:token:clear", onTokenClear);
+    return () => {
+      window.removeEventListener("fa:token:set", onTokenSet);
+      window.removeEventListener("fa:token:clear", onTokenClear);
+    };
+  }, []); // una vez
 
-  if (!tok) throw new Error(res?.data?.message || "No se recibió token.");
+  // Permite “inyectar” token (y user/exp)
+  const adoptToken = (tok, usr = null, trialExp = null) => {
+    localStorage.setItem("fa_token", tok);
+    setToken(tok);
 
-  localStorage.setItem("fa_token", tok);
-  if (usr) localStorage.setItem("fa_user", JSON.stringify(usr));
-  setToken(tok);
-  setUser(usr ?? null);
+    if (usr) {
+      localStorage.setItem("fa_user", JSON.stringify(usr));
+      setUser(usr);
+    } else {
+      // sesión temporal sin user en localStorage
+      localStorage.removeItem("fa_user");
+      setUser(null);
+    }
 
-  // opcional: si el backend no manda user, lo traemos
-  if (!usr) {
-    try {
-      const who = await api.get("/Auth/whoami");
-      console.log("whoami", who);
-      
-      const u = { id: Number(who.data?.sub), email: who.data?.email, role: who.data?.role ?? "user" };
-      localStorage.setItem("fa_user", JSON.stringify(u));
-      setUser(u);
-    } catch {/* ignore */}
-  }
+    const expFromJwt = decodeJwtExp(tok);
+    const finalExp = trialExp ? new Date(trialExp) : expFromJwt || null;
 
-  return { token: tok, user: usr };
-};
-
-
-  const logout = () => {
-    localStorage.removeItem("fa_token");
-    localStorage.removeItem("fa_user");
-    setToken(null); setUser(null);
+    if (finalExp) {
+      setTrialEndsAt(finalExp);
+      localStorage.setItem("fa_trial_exp", finalExp.toISOString());
+    } else {
+      setTrialEndsAt(null);
+      localStorage.removeItem("fa_trial_exp");
+    }
   };
 
-  const value = useMemo(() => ({ user, token, isAuthed, login, logout }), [user, token, isAuthed]);
+  // Login normal => NO trial
+  const login = async (email, password) => {
+    const res = await api.post("/Auth/login", { email, password });
+
+    const tok = res.data?.token ?? res.data?.Token;
+    const usr = res.data?.user  ?? res.data?.User;
+    if (!tok) throw new Error(res?.data?.message || "No se recibió token.");
+
+    localStorage.setItem("fa_token", tok);
+    if (usr) localStorage.setItem("fa_user", JSON.stringify(usr));
+    setToken(tok);
+    setUser(usr ?? null);
+
+    if (!usr) {
+      try {
+        const who = await api.get("/Auth/whoami");
+        const u = { id: Number(who.data?.sub), email: who.data?.email, role: who.data?.role ?? "user" };
+        localStorage.setItem("fa_user", JSON.stringify(u));
+        setUser(u);
+      } catch { /* ignore */ }
+    }
+
+    // apagar trial en login normal
+    setTrialEndsAt(null);
+    localStorage.removeItem("fa_trial_exp");
+
+    return { token: tok, user: usr };
+  };
+
+  const logout = async () => {
+    try { await api.post("/Auth/logout"); } catch { /* ignora */ }
+    localStorage.removeItem("fa_token");
+    localStorage.removeItem("fa_user");
+    localStorage.removeItem("fa_trial_exp");
+    setToken(null);
+    setUser(null);
+    setTrialEndsAt(null);
+    delete api.defaults.headers.common["Authorization"];
+  };
+
+  const value = useMemo(
+    () => ({ user, token, isAuthed, isTrial, trialEndsAt, login, logout, adoptToken }),
+    [user, token, isAuthed, isTrial, trialEndsAt]
+  );
+
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
