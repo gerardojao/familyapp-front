@@ -115,7 +115,7 @@ export default function TrialGate() {
           return;
         }
 
-        const res = await fetch(`${API_BASE}/Trials/redeem`, {
+        const res = await fetch(`${API_BASE}/api/Trials/redeem`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, token }),
