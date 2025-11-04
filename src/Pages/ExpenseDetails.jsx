@@ -106,9 +106,20 @@ export default function ExpenseDetails() {
   const total = useMemo(() => rows.reduce((acc, x) => acc + Number(x.importe ?? 0), 0), [rows]);
 
   const loadTipos = useCallback(async () => {
+    const NAME_MAP = {
+    "Transporte": "Gastos Casa",   
+  };
     try {
       const res = await api.get("/Egreso");
-      setTipos(res.data?.data ?? []);
+      const rawData = res.data?.data ?? [];
+      const translatedData = rawData.map(item => {     
+      const originalName = item.nombre ?? item.nombreEgreso;  
+      return {
+        ...item,
+        nombre: NAME_MAP[originalName] || originalName 
+      }
+      });
+      setTipos(translatedData);
     } catch {
       setTipos([]);
       setNotice({
