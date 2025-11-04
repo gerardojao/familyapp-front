@@ -272,8 +272,7 @@ export default function ExpenseDetails() {
   const getDisplayName = (originalName) => {
       if (originalName === "Transporte") {
         return "Gastos Casa";
-      }
-    
+      }    
       return originalName;
     };
 
@@ -348,6 +347,8 @@ export default function ExpenseDetails() {
               <option value="">Todos</option>
               {tipos.map((t) => {
                 const originalName = t.nombre ?? t.nombreEgreso;
+                console.log("luego del return", originalName);
+                
                 return (
                   <option key={t.id} value={t.id}>
                     {getDisplayName(originalName)}
@@ -433,7 +434,7 @@ export default function ExpenseDetails() {
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 mt-0.5">
-                    {r.tipo ?? "—"} · {r.mes ?? "—"}
+                   {r.tipo === 'Transporte' ? 'Gastos casa' : r.tipo} · {r.mes ?? "—"}
                   </div>
                   <div className="text-sm text-slate-700 mt-1 truncate">{r.descripcion ?? "—"}</div>
                 </div>
@@ -502,7 +503,7 @@ export default function ExpenseDetails() {
                             {r.fecha ? soloFecha(r.fecha) : "—"}
                           </td>
                           <td className="py-2.5 px-3">{r.mes ?? "—"}</td>
-                          <td className="py-2.5 px-3">{r.tipo ?? "—"}</td>
+                          <td className="py-2.5 px-3">{r.tipo === 'Transporte' ? 'Gastos Casa' : r.tipo ?? "—"}</td>
                           <td className="py-2.5 px-3 text-slate-700">{r.descripcion ?? "—"}</td>
                           <td className="py-2.5 px-3 text-right font-semibold text-rose-700 whitespace-nowrap">
                             {eur.format(Number(r.importe ?? 0))}

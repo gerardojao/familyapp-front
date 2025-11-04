@@ -186,7 +186,7 @@ export default function ShowExpenses() {
                       ) : (
                         rows.map((r, i) => (
                           <tr key={i} className="border-t border-slate-200/70 hover:bg-slate-50">
-                            <td className="py-2 px-3">{r.cuenta_Egreso}</td>
+                            <td className="py-2 px-3">{r.cuenta_Egreso === 'Transporte' ? 'Gastos casa' : r.cuenta_Egreso}</td>
                             <td className="py-2 px-3 text-right font-semibold text-rose-700">
                               {eur.format(r.total ?? 0)}
                             </td>

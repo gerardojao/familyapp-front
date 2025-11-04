@@ -20,10 +20,24 @@ export default function Statement() {
   };
 
   const getExpenses = async () => {
-    const res = await api.get("/Egreso/totales");
-    setExpenses(res?.data?.data?.[0] || []);
+    const NAME_MAP = {
+    "Transporte": "Gastos Casa",   
   };
-
+    const res = await api.get("/Egreso/totales");
+    const rawData = res?.data?.data?.[0] || [];
+    const translatedData = rawData.map(item => {     
+      const originalName = item.nombre ?? item.nombreEgreso; 
+      
+      console.log(originalName);
+       
+      return {
+        ...item,
+        nombre: NAME_MAP[originalName] || originalName 
+      }
+      });
+    setExpenses(translatedData);
+  };
+   
   useEffect(() => {
     (async () => {
       try {
