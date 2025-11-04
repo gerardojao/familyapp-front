@@ -113,7 +113,10 @@ export default function ExpenseDetails() {
       const res = await api.get("/Egreso");
       const rawData = res.data?.data ?? [];
       const translatedData = rawData.map(item => {     
-      const originalName = item.nombre ?? item.nombreEgreso;  
+      const originalName = item.nombre ?? item.nombreEgreso; 
+      
+      console.log(originalName);
+       
       return {
         ...item,
         nombre: NAME_MAP[originalName] || originalName 
