@@ -138,7 +138,7 @@ export default function Statement() {
               <tbody>
                 {expenses.map((e, idx) => (
                   <tr key={idx} className="tr">
-                    <td className="td">{e.cuenta_Egreso ?? e.Cuenta_Egreso}</td>
+                    <td className="td">{e.cuenta_Egreso === 'Transporte' ? 'Gastos casa' : e.cuenta_Egreso}</td>
                     <td className="td text-right font-semibold text-rose-700">
                       {currency(e.total ?? e.Total ?? 0)}
                     </td>
