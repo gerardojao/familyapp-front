@@ -254,6 +254,14 @@ useEffect(() => {
         : "border-slate-300"
     }`;
 
+    const getDisplayName = (originalName) => {
+      if (originalName === "Transporte") {
+        return "Gastos Casa";
+      }
+    
+      return originalName;
+    };
+
   return (
     <>
       <div className="flex items-center justify-between gap-3 mt-2 mb-6 md:mb-8">
@@ -302,7 +310,7 @@ useEffect(() => {
             aria-describedby={errors.NombreEgreso ? "NombreEgreso-error" : undefined}
           >
             <option value="">Selecciona…</option>
-            {outTypes.map(o => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+            {outTypes.map(o => <option key={o.id} value={o.id}>{getDisplayName(o.nombre)}</option>)}
           </select>
           {errors.NombreEgreso && <FieldError id="NombreEgreso-error">{errors.NombreEgreso}</FieldError>}
         </div>
