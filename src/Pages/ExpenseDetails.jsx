@@ -255,6 +255,13 @@ export default function ExpenseDetails() {
       });
     }
   };
+  const getDisplayName = (originalName) => {
+      if (originalName === "Transporte") {
+        return "Gastos Casa";
+      }
+    
+      return originalName;
+    };
 
   return (
     <>
@@ -325,11 +332,15 @@ export default function ExpenseDetails() {
               onChange={(e) => setTipoId(e.target.value)}
             >
               <option value="">Todos</option>
-              {tipos.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.nombre ?? t.nombreEgreso}
-                </option>
-              ))}
+              {tipos.map((t) => {
+                const originalName = t.nombre ?? t.nombreEgreso;
+                return (
+                  <option key={t.id} value={t.id}>
+                    {getDisplayName(originalName)}
+                  </option>
+                );
+              })}
+              
             </select>
           </div>
 
