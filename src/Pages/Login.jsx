@@ -12,29 +12,64 @@ export default function Login() {
   const [show, setShow]   = useState(false);
   const [busy, setBusy]   = useState(false);
   const [err, setErr]     = useState("");
+ 
+  const params = new URLSearchParams(window.location.search);
+  const qReturn = params.get("returnUrl") || "";
+  const allowed = [
+    "https://invoice.familyapp.store",
+    "https://www.invoice.familyapp.store",
+    "https://localhost:5173",
+    "https://localhost:5174",
+    "http://localhost:5173",
+    "http://localhost:5174",
+  ];
+  const hasAllowedReturn = allowed.some(a => qReturn.startsWith(a));
+  const targetAfterLogin = hasAllowedReturn ? qReturn : "/";
 
+  useEffect(() => {
+    if (!isAuthed) return;
+    // if (targetAfterLogin === "/") {
+    //   nav("/");
+    // } else {
+    //   window.location.assign(targetAfterLogin);
+    // }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    (async () => {
+    const base = import.meta.env.VITE_API_BASE ?? "https://localhost:7288/api";
+    const r = await fetch(`${base}/auth/me`, { credentials: "include", cache: "no-store" });
+    if (r.ok) {
+      if (targetAfterLogin === "/") nav("/");
+      else window.location.assign(targetAfterLogin);
+    }
+    // si 401, no redirijas y muestra el formulario
+  })();
+  }, [isAuthed]);
 
-  useEffect(() => { if (isAuthed) nav("/"); }, [isAuthed, nav]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setErr("");
     if (!email || !pwd) { setErr("Completa tus credenciales."); return; }
+
     try {
       setBusy(true);
-      await login(email.trim(), pwd);
-      nav("/"); // éxito
+      await login(email.trim(), pwd); // el backend pone la cookie
+
+      if (targetAfterLogin === "/") {
+        nav("/");
+      } else {
+        window.location.assign(targetAfterLogin);
+      }
     } catch (ex) {
       const msg = ex?.response?.data?.message
         ?? ex?.response?.data?.Message
         ?? ex?.message
         ?? "Error al iniciar sesión";
-        setErr(msg);
+      setErr(msg);
     } finally {
       setBusy(false);
     }
   };
-
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="rounded-2xl bg-white/80 backdrop-blur ring-1 ring-slate-200 shadow-sm p-6">

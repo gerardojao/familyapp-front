@@ -10,7 +10,8 @@ const baseURL =
 
 const api = axios.create({
   baseURL,
-  timeout: 15000,
+  timeout: 45000,
+  withCredentials: true,   
 });
 
 // (opcional para verificar en prod)

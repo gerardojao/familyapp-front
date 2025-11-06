@@ -309,6 +309,8 @@ export default function AuthProvider({ children }) {
     const res = await api.post("/Auth/login", { email, password });
 
     const tok = res.data?.token ?? res.data?.Token;
+    console.log(tok);
+    
     const usr = res.data?.user  ?? res.data?.User;
     if (!tok) throw new Error(res?.data?.message || "No se recibió token.");
 
