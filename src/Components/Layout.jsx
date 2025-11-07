@@ -8,6 +8,7 @@ import TrialBanner from "./TrialBanner";
 const primaryBtn   = "inline-flex items-center rounded-xl px-4 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-sm";
 const secondaryBtn = "inline-flex items-center rounded-xl px-4 py-2.5 bg-sky-600 text-white hover:bg-sky-700 transition shadow-sm";
 const linkBtn      = "inline-flex items-center rounded-xl px-4 py-2.5 bg-slate-600 text-white hover:bg-slate-700 transition shadow-sm";
+const InvoiceBtn      = "inline-flex items-center rounded-xl px-4 py-2.5 bg-orange-600 text-white hover:bg-orange-700 transition shadow-sm font-semibold";
 
 export default function Layout({ children }) {
   const [open, setOpen] = useState(false);
@@ -135,6 +136,7 @@ export default function Layout({ children }) {
                     <Link to="/register-income" className={primaryBtn}>Nuevo ingreso</Link>
                     <Link to="/register-expense" className={secondaryBtn}>Nuevo egreso</Link>
                     <Link to="/statement" className={linkBtn}>Ver Balance</Link>
+                    <Link to="https://invoice.familyapp.store" className={InvoiceBtn}>Facturar</Link>
                   </>
                 ) : (
                   <Link to="/login" className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 bg-slate-800 text-white hover:bg-slate-900">
