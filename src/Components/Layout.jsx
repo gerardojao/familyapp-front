@@ -95,6 +95,7 @@ export default function Layout({ children }) {
                     <NavLink to="/statement" className="px-3 py-2 rounded-lg hover:bg-slate-100" onClick={() => setOpen(false)}>
                       Ver Balance
                     </NavLink>
+                     <Link to="https://invoice.familyapp.store" className="px-3 py-2 rounded-lg hover:bg-slate-100">Facturar</Link>
                     <button onClick={onLogout} className="mt-1 px-3 py-2 rounded-lg hover:bg-rose-50 text-rose-700 text-left">
                       <span className="inline-flex items-center gap-2"><LogOut size={16} /> Salir</span>
                     </button>
