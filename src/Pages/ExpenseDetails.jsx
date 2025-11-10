@@ -395,13 +395,13 @@ export default function ExpenseDetails() {
           >
             Últimos 30 días
           </button>
-          <button
+          {/* <button
             type="button"
             onClick={setThisYear}
             className="rounded-full px-3 py-1 text-sm bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100 transition"
           >
             Este año
-          </button>
+          </button> */}
           <button
             type="button"
             onClick={onClear}
@@ -418,46 +418,61 @@ export default function ExpenseDetails() {
           <div className="rounded-2xl bg-white/80 backdrop-blur shadow-sm ring-1 ring-slate-200 p-4">
             <Loader />
           </div>
-        ) : rows.length === 0 ? (
-          <div className="rounded-2xl bg-white/80 backdrop-blur shadow-sm ring-1 ring-slate-200 p-4 text-slate-500">
-            Sin resultados
-          </div>
-        ) : (
-          rows.map((r) => (
-            <article key={r.id} className="rounded-2xl border border-slate-200 bg-white/70 p-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-slate-800">
-                    {r.fecha ? soloFecha(r.fecha) : "—"}
-                    <span className="ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs ring-1 bg-rose-50 text-rose-700 ring-rose-200">
-                      Egreso
-                    </span>
+        ) : (          
+<>
+      {/* Resumen (Resultados + Total) */}
+      <div className="flex items-center justify-between mb-1 rounded-2xl bg-white/80 backdrop-blur shadow-sm ring-1 ring-slate-200 p-3">
+        <div className="text-sm text-slate-500">
+          Resultados: <span className="font-medium text-slate-700">{rows.length}</span>
+        </div>
+        <div className="text-sm font-medium text-slate-600">
+          Total: <span className="text-slate-900">{eur.format(total)}</span>
+        </div>
+      </div>
+
+      {/* Lista / vacío */}
+      {rows.length === 0 ? (
+        <div className="rounded-2xl bg-white/80 backdrop-blur shadow-sm ring-1 ring-slate-200 p-4 text-slate-500">
+          Sin resultados
+        </div>
+      ) : (
+            rows.map((r) => (
+              <article key={r.id} className="rounded-2xl border border-slate-200 bg-white/70 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-slate-800">
+                      {r.fecha ? soloFecha(r.fecha) : "—"}
+                      <span className="ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs ring-1 bg-rose-50 text-rose-700 ring-rose-200">
+                        Egreso
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500 mt-0.5">
+                      {r.tipo === "Transporte" ? "Gastos casa" : r.tipo} · {r.mes ?? "—"}
+                    </div>
+                    <div className="text-sm text-slate-700 mt-1 truncate">{r.descripcion ?? "—"}</div>
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
-                   {r.tipo === 'Transporte' ? 'Gastos casa' : r.tipo} · {r.mes ?? "—"}
+                  <div className="shrink-0 text-right">
+                    <div className="font-semibold text-rose-700">{eur.format(Number(r.importe ?? 0))}</div>
+                    <div className="mt-2 flex justify-end gap-1">
+                      <button
+                        onClick={() => onEdit(r)}
+                        className="inline-flex items-center rounded-md px-2 py-1 bg-sky-600 text-white text-xs hover:bg-sky-700"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => onDeleteClick(r)}
+                        className="inline-flex items-center rounded-md px-2 py-1 bg-rose-600 text-white text-xs hover:bg-rose-700"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
-                  <div className="text-sm text-slate-700 mt-1 truncate">{r.descripcion ?? "—"}</div>
                 </div>
-                <div className="shrink-0 text-right">
-                  <div className="font-semibold text-rose-700">{eur.format(Number(r.importe ?? 0))}</div>
-                  <div className="mt-2 flex justify-end gap-1">
-                    <button
-                      onClick={() => onEdit(r)}
-                      className="inline-flex items-center rounded-md px-2 py-1 bg-sky-600 text-white text-xs hover:bg-sky-700"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => onDeleteClick(r)}
-                      className="inline-flex items-center rounded-md px-2 py-1 bg-rose-600 text-white text-xs hover:bg-rose-700"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))
+              </article>
+            ))
+          )}
+        </>
         )}
       </section>
 
