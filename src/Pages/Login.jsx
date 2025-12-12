@@ -1,50 +1,53 @@
 // src/Pages/Login.jsx
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../Components/AuthContext";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 
 export default function Login() {
   const nav = useNavigate();
-  const { login, isAuthed } = useAuth();  
+  const location = useLocation();
+  const { login, isAuthed } = useAuth();
+
   const [email, setEmail] = useState("");
   const [pwd, setPwd]     = useState("");
   const [show, setShow]   = useState(false);
   const [busy, setBusy]   = useState(false);
   const [err, setErr]     = useState("");
- 
-  const params = new URLSearchParams(window.location.search);
+
+  // === returnUrl seguro ===
+  const params = new URLSearchParams(location.search);
   const qReturn = params.get("returnUrl") || "";
+
   const allowed = [
     "https://invoice.familyapp.store",
     "https://www.invoice.familyapp.store",
     "https://localhost:5173",
-    "https://localhost:5174",
+    "https://localhost:5174", // por si algún día lo usas
     "http://localhost:5173",
     "http://localhost:5174",
   ];
+
   const hasAllowedReturn = allowed.some(a => qReturn.startsWith(a));
   const targetAfterLogin = hasAllowedReturn ? qReturn : "/";
 
+  // Si YA estás autenticado y entras al login, redirige solo
   useEffect(() => {
     if (!isAuthed) return;
-    // if (targetAfterLogin === "/") {
-    //   nav("/");
-    // } else {
-    //   window.location.assign(targetAfterLogin);
-    // }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    (async () => {
-    const base = import.meta.env.VITE_API_BASE ?? "https://localhost:7288/api";
-    const r = await fetch(`${base}/auth/me`, { credentials: "include", cache: "no-store" });
-    if (r.ok) {
-      if (targetAfterLogin === "/") nav("/");
-      else window.location.assign(targetAfterLogin);
-    }
-    // si 401, no redirijas y muestra el formulario
-  })();
-  }, [isAuthed]);
 
+    (async () => {
+      const base = import.meta.env.VITE_API_BASE ?? "https://localhost:7288/api";
+      const r = await fetch(`${base}/auth/me`, { credentials: "include", cache: "no-store" });
+      if (!r.ok) return; // 401 → sigue mostrando el login
+
+      if (targetAfterLogin === "/") {
+        nav("/");
+      } else {
+        window.location.assign(targetAfterLogin);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthed]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -70,6 +73,7 @@ export default function Login() {
       setBusy(false);
     }
   };
+
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="rounded-2xl bg-white/80 backdrop-blur ring-1 ring-slate-200 shadow-sm p-6">
@@ -77,7 +81,11 @@ export default function Login() {
         <p className="text-sm text-slate-600 text-center mt-1">Accede a tu cuenta FamilyApp</p>
 
         <form onSubmit={onSubmit} className="mt-5 space-y-4">
-          {err && <div className="rounded-lg bg-rose-50 text-rose-700 px-3 py-2 text-sm ring-1 ring-rose-200">{err}</div>}
+          {err && (
+            <div className="rounded-lg bg-rose-50 text-rose-700 px-3 py-2 text-sm ring-1 ring-rose-200">
+              {err}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>

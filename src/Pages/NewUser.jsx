@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { UserPlus, Mail, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import api from "../Components/api";
 import WelcomeModal from "../Components/WelcomeModal";
@@ -9,6 +9,17 @@ const labelCls = "block text-sm font-medium text-slate-700 mb-1";
 
 export default function NewUser() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // 👇 Leer returnUrl de la query, igual que en Login
+  const params = new URLSearchParams(location.search);
+  const qReturn = params.get("returnUrl") || "";
+
+  // Ruta de login teniendo en cuenta returnUrl
+  const loginPath = qReturn
+    ? `/login?returnUrl=${encodeURIComponent(qReturn)}`
+    : "/login";
+
   const [nombre, setNombre] = useState("");
   const [email, setEmail]   = useState("");
   const [pass, setPass]     = useState("");
@@ -40,9 +51,8 @@ export default function NewUser() {
     setLoading(true);
     setErr("");
     try {
-      // Ajusta la ruta si tu backend usa otra (ej: "/Usuario/registro")
       const res = await api.post("/Auth/register", {
-        nombre,        // el backend debe mapear "nombre" -> FullName (JsonPropertyName)
+        nombre,        // el backend debe mapear "nombre" -> FullName
         email,
         password: pass
       });
@@ -53,7 +63,6 @@ export default function NewUser() {
         throw new Error(msg);
       }
 
-      // Toma el nombre del back o del input o del correo (antes de @)
       const name =
         res?.data?.data?.user?.fullName ||
         nombre ||
@@ -62,7 +71,12 @@ export default function NewUser() {
       setWelcomeName(name);
       setShowWelcome(true);  // abre el modal
     } catch (error) {
-      setErr(error?.response?.data?.message || error?.response?.data?.Message || error.message || "Error registrando el usuario");
+      setErr(
+        error?.response?.data?.message
+        || error?.response?.data?.Message
+        || error.message
+        || "Error registrando el usuario"
+      );
     } finally {
       setLoading(false);
     }
@@ -94,13 +108,24 @@ export default function NewUser() {
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
               <label className={labelCls} htmlFor="nombre">Nombre (opcional)</label>
-              <input id="nombre" className={inputCls} value={nombre} onChange={(e)=>setNombre(e.target.value)} />
+              <input
+                id="nombre"
+                className={inputCls}
+                value={nombre}
+                onChange={(e)=>setNombre(e.target.value)}
+              />
             </div>
 
             <div>
               <label className={labelCls} htmlFor="email">Correo</label>
               <div className="relative">
-                <input id="email" type="email" className={inputCls + " pr-10"} value={email} onChange={(e)=>setEmail(e.target.value)} />
+                <input
+                  id="email"
+                  type="email"
+                  className={inputCls + " pr-10"}
+                  value={email}
+                  onChange={(e)=>setEmail(e.target.value)}
+                />
                 <Mail size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/>
               </div>
             </div>
@@ -116,8 +141,12 @@ export default function NewUser() {
                   onChange={(e)=>setPass(e.target.value)}
                   placeholder="Mínimo 8 caracteres, 1 mayúscula, 1 minúscula y 1 número"
                 />
-                <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-500"
-                  onClick={()=>setShow1(s=>!s)} aria-label={show1 ? "Ocultar contraseña" : "Mostrar contraseña"}>
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-500"
+                  onClick={()=>setShow1(s=>!s)}
+                  aria-label={show1 ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
                   {show1 ? <EyeOff size={16}/> : <Eye size={16}/>}
                 </button>
               </div>
@@ -133,8 +162,12 @@ export default function NewUser() {
                   value={pass2}
                   onChange={(e)=>setPass2(e.target.value)}
                 />
-                <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-500"
-                  onClick={()=>setShow2(s=>!s)} aria-label={show2 ? "Ocultar contraseña" : "Mostrar contraseña"}>
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-500"
+                  onClick={()=>setShow2(s=>!s)}
+                  aria-label={show2 ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
                   {show2 ? <EyeOff size={16}/> : <Eye size={16}/>}
                 </button>
               </div>
@@ -150,7 +183,12 @@ export default function NewUser() {
 
             <p className="text-sm text-slate-600 text-center">
               ¿Ya tienes cuenta?{" "}
-              <Link to="/login" className="text-slate-900 font-medium hover:underline">Inicia sesión</Link>
+              <Link
+                to={loginPath}
+                className="text-slate-900 font-medium hover:underline"
+              >
+                Inicia sesión
+              </Link>
             </p>
           </form>
         </div>
@@ -160,8 +198,11 @@ export default function NewUser() {
       <WelcomeModal
         open={showWelcome}
         name={welcomeName}
-        onClose={() => { setShowWelcome(false); navigate("/login"); }}
-        onLogin={() => navigate("/login")}
+        onClose={() => {
+          setShowWelcome(false);
+          navigate(loginPath);        
+        }}
+        onLogin={() => navigate(loginPath)}
       />
     </>
   );
