@@ -37,7 +37,7 @@ export default function Login() {
 
     (async () => {
       const base = import.meta.env.VITE_API_BASE ?? "https://localhost:7288/api";
-      const r = await fetch(`${base}/Auth/auth/whoami`, { credentials: "include", cache: "no-store" });
+      const r = await fetch(`${base}/auth/me`, { credentials: "include", cache: "no-store" });
       if (!r.ok) return; // 401 → sigue mostrando el login
 
       if (targetAfterLogin === "/") {
