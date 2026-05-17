@@ -1,6 +1,12 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "http://familyapp-api.somee.com/api/$1" },
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/api/:path*",
+      "destination": "http://familyapp-api.somee.com/api/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/"
+    }
   ]
 }
